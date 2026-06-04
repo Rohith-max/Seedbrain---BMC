@@ -28,6 +28,14 @@
   --color-nidhi-gold-dim:   #8B7322;
   --color-nidhi-gold-glow:  rgba(212, 175, 55, 0.15);
 
+  /* Tri-color Accents */
+  --color-nidhi-saffron:       #FF8038;
+  --color-nidhi-saffron-glow:  rgba(255, 128, 56, 0.1);
+  --color-nidhi-green-accent:  #10B981;
+  --color-nidhi-green-glow:    rgba(16, 185, 129, 0.1);
+  --color-nidhi-blue-accent:   #38BDF8;
+  --color-nidhi-blue-glow:    rgba(56, 189, 248, 0.1);
+
   /* Semantic */
   --color-nidhi-success: #22C55E;
   --color-nidhi-warning: #F59E0B;
@@ -168,6 +176,44 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.glass-premium {
+  background: rgba(12, 12, 12, 0.4);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.37),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/* ============================================================
+   Section Layout Container — reliable cross-breakpoint wrapper
+   Use this instead of Tailwind max-w-* utilities for sections,
+   as Tailwind v4's container/max-width can be unreliable here.
+   ============================================================ */
+.section-container {
+  width: 100%;
+  max-width: 72rem; /* 1152px */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .section-container {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .section-container {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
 }
 
 /* ============================================================

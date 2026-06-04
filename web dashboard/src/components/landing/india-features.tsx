@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import {
   FileText,
   IndianRupee,
@@ -13,186 +13,233 @@ import {
   Shield,
 } from 'lucide-react';
 
+const features = [
+  {
+    icon: FileText,
+    title: 'Document Intelligence',
+    description: 'Natively understands Aadhaar, PAN, RC Book, Khata, LIC policies, Form 16 — every document your family has.',
+    badges: ['Aadhaar', 'PAN', 'Voter ID', 'Passbook'],
+    badgeStyle: 'bg-sky-500/10 text-sky-400 border-sky-500/15',
+    iconStyle: 'bg-sky-500/10 text-sky-400',
+    hoverStyle: 'hover:border-sky-500/25',
+  },
+  {
+    icon: Brain,
+    title: 'Government Scheme AI',
+    description: 'AI engine identifies schemes your family qualifies for — PM Kisan, Ayushman Bharat, Sukanya Samriddhi.',
+    badges: ['PMAY', 'Scholarships', 'Senior Benefits'],
+    badgeStyle: 'bg-orange-500/10 text-orange-400 border-orange-500/15',
+    iconStyle: 'bg-orange-500/10 text-orange-400',
+    hoverStyle: 'hover:border-orange-500/25',
+  },
+  {
+    icon: IndianRupee,
+    title: 'Financial Tracking',
+    description: 'Track LIC premiums, EMIs, tax deadlines, SIP investments, FD maturity and school fees.',
+    badges: ['LIC', 'EMI', 'SIP', 'Tax'],
+    badgeStyle: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/15',
+    iconStyle: 'bg-emerald-500/10 text-emerald-400',
+    hoverStyle: 'hover:border-emerald-500/25',
+  },
+  {
+    icon: Users,
+    title: 'Joint Family Support',
+    description: 'Manage documents for parents, grandparents, children, and dependents all in one unified place.',
+    badges: ['Family Head', 'Nominees', 'Dependents'],
+    badgeStyle: 'bg-orange-500/10 text-orange-400 border-orange-500/15',
+    iconStyle: 'bg-orange-500/10 text-orange-400',
+    hoverStyle: 'hover:border-orange-500/25',
+  },
+  {
+    icon: Globe,
+    title: '8 Indian Languages',
+    description: 'Hindi, Kannada, Tamil, Telugu, Malayalam, Marathi, Bengali — speak naturally in your language.',
+    badges: ['हिंदी', 'ಕನ್ನಡ', 'தமிழ்', 'తెలుగు'],
+    badgeStyle: 'bg-sky-500/10 text-sky-400 border-sky-500/15',
+    iconStyle: 'bg-sky-500/10 text-sky-400',
+    hoverStyle: 'hover:border-sky-500/25',
+  },
+  {
+    icon: Bell,
+    title: 'Proactive Alerts',
+    description: 'Never miss a benefit. Reminders for deadlines, expiring documents, and new eligible schemes.',
+    badges: ['Benefit Alerts', 'Reminders'],
+    badgeStyle: 'bg-orange-500/10 text-orange-400 border-orange-500/15',
+    iconStyle: 'bg-orange-500/10 text-orange-400',
+    hoverStyle: 'hover:border-orange-500/25',
+  },
+  {
+    icon: BarChart3,
+    title: 'Financial Health Score',
+    description: 'Insights on savings, insurance coverage gaps, and optimisation recommendations for family finances.',
+    badges: ['EMI Analysis', 'Coverage Gaps'],
+    badgeStyle: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/15',
+    iconStyle: 'bg-emerald-500/10 text-emerald-400',
+    hoverStyle: 'hover:border-emerald-500/25',
+  },
+  {
+    icon: Shield,
+    title: 'Bank-Grade Security',
+    description: 'End-to-end encryption with local-first architecture. Your documents never leave your device without consent.',
+    badges: ['AES-256', 'Zero-Knowledge'],
+    badgeStyle: 'bg-sky-500/10 text-sky-400 border-sky-500/15',
+    iconStyle: 'bg-sky-500/10 text-sky-400',
+    hoverStyle: 'hover:border-sky-500/25',
+  },
+];
+
+const checklist = [
+  { title: 'Document Intelligence', desc: 'Native classification for Aadhaar, PAN, RC, Khata, LIC policies.' },
+  { title: 'Government Scheme AI', desc: 'Identifies 50+ central & state welfare benefits automatically.' },
+  { title: '8 Indian Languages', desc: 'Conversational AI in Hindi, Tamil, Kannada, Marathi, and more.' },
+  { title: 'Location Intelligence', desc: 'Geo-specific benefit detection by district and state criteria.' },
+  { title: 'Indian Financial Workflows', desc: 'Post office deposits, EMIs, LIC cycles — all supported natively.' },
+];
+
+const stats = [
+  { value: '30+', label: 'Document Types' },
+  { value: '50+', label: 'Welfare Schemes' },
+  { value: '8', label: 'Languages' },
+];
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100, damping: 15 } },
+};
+
 export function IndiaFeaturesSection() {
-  const features = [
-    {
-      icon: FileText,
-      title: 'Indian Document Intelligence',
-      description: 'Natively understands Aadhaar, PAN, RC Book, Khata, LIC policies, Form 16 - every document your family has.',
-      examples: 'Aadhaar • PAN • Voter ID • Bank Passbook',
-      color: 'text-blue-400'
-    },
-    {
-      icon: Brain,
-      title: 'Government Scheme AI',
-      description: 'AI engine identifies schemes your family qualifies for. From PM Kisan to Ayushman Bharat to Sukanya Samriddhi.',
-      examples: 'PMAY • Scholarships • Senior Benefits',
-      color: 'text-purple-400'
-    },
-    {
-      icon: IndianRupee,
-      title: 'Financial Tracking (भारतीय)',
-      description: 'Track LIC premiums, EMIs, tax deadlines, SIP investments, FD maturity, school fees - all Indian workflows.',
-      examples: 'LIC • EMI • Tax • SIP • School Fees',
-      color: 'text-green-400'
-    },
-    {
-      icon: Users,
-      title: 'Joint Family Management',
-      description: 'Built for Indian families. Manage documents for parents, grandparents, children, dependents in one place.',
-      examples: 'Family Head • Nominatees • Dependents',
-      color: 'text-pink-400'
-    },
-    {
-      icon: Globe,
-      title: '8 Indian Languages',
-      description: 'Hindi, Kannada, Tamil, Telugu, Malayalam, Marathi, Bengali - speak naturally, get responses in your language.',
-      examples: 'हिंदी • ಕನ್ನಡ • தமிழ் • తెలుగు',
-      color: 'text-yellow-400'
-    },
-    {
-      icon: Bell,
-      title: 'Proactive Alerts',
-      description: 'Never miss a benefit. Reminders for missed deadlines, expiring documents, new schemes your family qualifies for.',
-      examples: 'Benefit Alerts • Deadline Reminders',
-      color: 'text-orange-400'
-    },
-    {
-      icon: BarChart3,
-      title: 'Family Financial Health',
-      description: 'Insights on savings, investments, insurance coverage. Recommendations to optimize family finances.',
-      examples: 'EMI Analysis • Coverage Gap Detection',
-      color: 'text-cyan-400'
-    },
-    {
-      icon: Shield,
-      title: 'Bank-Grade Security',
-      description: 'End-to-end encryption. Local-first architecture. Your family documents never leave your device without consent.',
-      examples: 'AES-256 • Zero-Knowledge • NIST Compliant',
-      color: 'text-red-400'
-    },
-  ];
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
-
   return (
-    <section className="py-20 px-4 md:px-8 bg-nidhi-black relative">
-      {/* Decorative elements */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-nidhi-gold/5 rounded-full blur-[150px] -z-10" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-nidhi-accent/5 rounded-full blur-[150px] -z-10" />
+    <section className="relative bg-nidhi-black overflow-hidden">
+      {/* Ambient glows */}
+      <div className="absolute top-0 left-1/3 w-96 h-96 bg-orange-500/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/3 w-96 h-96 bg-emerald-500/5 rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
+      <div className="section-container py-24 md:py-32">
+
+        {/* ── Section header ─────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-16 md:mb-20"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-display font-bold text-white tracking-tight leading-tight mb-5">
             Built for Indian Households
           </h2>
-          <p className="text-xl text-nidhi-text-secondary max-w-2xl mx-auto">
-            Not a global app with Indian features. NIDHI is designed from the ground up for Indian families.
+          <p className="text-lg text-nidhi-text-secondary max-w-2xl mx-auto leading-relaxed">
+            Not a global app with Indian features. NIDHI is designed from the ground up for the unique workflows of Indian families.
           </p>
         </motion.div>
 
-        {/* Features Grid */}
+        {/* ── Feature cards grid ─────────────────────────── */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true }}
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+          viewport={{ once: true, margin: '-40px' }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
         >
-          {features.map((feature, idx) => {
-            const Icon = feature.icon;
+          {features.map((f, idx) => {
+            const Icon = f.icon;
             return (
-              <motion.div
+              <motion.article
                 key={idx}
                 variants={itemVariants}
-                className="bg-nidhi-card/50 border border-nidhi-border hover:border-nidhi-gold/30 rounded-xl p-6 hover:bg-nidhi-card transition-all group"
+                className={[
+                  'flex flex-col rounded-2xl p-6',
+                  'bg-white/[0.03] border border-white/[0.06]',
+                  'transition-all duration-300 group',
+                  'hover:-translate-y-1',
+                  f.hoverStyle,
+                ].join(' ')}
               >
-                <div className="mb-4">
-                  <Icon className={`w-8 h-8 ${feature.color} group-hover:scale-110 transition-transform`} />
+                {/* Icon */}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-200 ${f.iconStyle}`}>
+                  <Icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-sm text-nidhi-text-secondary mb-4">{feature.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {feature.examples.split(' • ').map((example, i) => (
-                    <span key={i} className="text-xs bg-nidhi-gold/10 text-nidhi-gold px-2 py-1 rounded">
-                      {example}
+
+                {/* Title */}
+                <h3 className="text-base font-semibold text-white mb-2 leading-snug">
+                  {f.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-sm text-nidhi-text-secondary leading-relaxed mb-5 flex-1">
+                  {f.description}
+                </p>
+
+                {/* Badges */}
+                <div className="flex flex-wrap gap-1.5 mt-auto">
+                  {f.badges.map((b, i) => (
+                    <span key={i} className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${f.badgeStyle}`}>
+                      {b}
                     </span>
                   ))}
                 </div>
-              </motion.div>
+              </motion.article>
             );
           })}
         </motion.div>
 
-        {/* Why India First */}
+        {/* ── Why India First ────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-16 bg-gradient-to-r from-nidhi-gold/10 to-nidhi-accent/10 border border-nidhi-gold/20 rounded-xl p-8"
+          viewport={{ once: true, margin: '-40px' }}
+          transition={{ duration: 0.5 }}
+          className="mt-24 md:mt-32 grid lg:grid-cols-2 gap-12 lg:gap-16 items-start"
         >
-          <h3 className="text-2xl font-bold text-white mb-4">Why India First?</h3>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <p className="text-nidhi-text-secondary mb-4">
-                Indian families face unique challenges. Joint households. Government scheme deadlines. Documents in multiple formats. Regional languages. We built NIDHI specifically for these workflows, not as an afterthought.
-              </p>
-              <ul className="space-y-2">
-                <li className="flex gap-2 text-sm">
-                  <span className="text-nidhi-gold">✓</span>
-                  <span className="text-nidhi-text-secondary">Understands 30+ Indian document types</span>
-                </li>
-                <li className="flex gap-2 text-sm">
-                  <span className="text-nidhi-gold">✓</span>
-                  <span className="text-nidhi-text-secondary">AI identifies 50+ government schemes</span>
-                </li>
-                <li className="flex gap-2 text-sm">
-                  <span className="text-nidhi-gold">✓</span>
-                  <span className="text-nidhi-text-secondary">Supports 8 Indian regional languages</span>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-nidhi-text-secondary mb-4">
-                We're not just localizing. We're architecting. From government office locations to tax calendar to family structure - everything is designed for India first.
-              </p>
-              <ul className="space-y-2">
-                <li className="flex gap-2 text-sm">
-                  <span className="text-nidhi-gold">✓</span>
-                  <span className="text-nidhi-text-secondary">Store location intelligence for schemes</span>
-                </li>
-                <li className="flex gap-2 text-sm">
-                  <span className="text-nidhi-gold">✓</span>
-                  <span className="text-nidhi-text-secondary">Indian financial workflow optimization</span>
-                </li>
-                <li className="flex gap-2 text-sm">
-                  <span className="text-nidhi-gold">✓</span>
-                  <span className="text-nidhi-text-secondary">Demo data with real Indian names/addresses</span>
-                </li>
-              </ul>
+          {/* Left — headline + stats */}
+          <div>
+            <h3 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight leading-tight mb-5">
+              Why{' '}
+              <span className="bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+                India First?
+              </span>
+            </h3>
+            <p className="text-base md:text-lg text-nidhi-text-secondary leading-relaxed mb-10 max-w-prose">
+              Indian families navigate a distinct, multi-generational web of financial and administrative tasks.
+              Joint households, government scheme deadlines, and documents in many languages —
+              NIDHI is custom-built for these workflows, not adapted from a generic global product.
+            </p>
+
+            {/* Stats row */}
+            <div className="flex gap-8 pt-8 border-t border-white/[0.06]">
+              {stats.map((s, i) => (
+                <div key={i}>
+                  <div className="text-3xl font-display font-bold bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent">
+                    {s.value}
+                  </div>
+                  <div className="text-sm text-nidhi-text-secondary mt-1">{s.label}</div>
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* Right — checklist card */}
+          <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-7 md:p-8 flex flex-col gap-6">
+            {checklist.map((c, i) => (
+              <div key={i} className="flex gap-4 items-start">
+                <div className="mt-0.5 w-5 h-5 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 12 12">
+                    <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white leading-snug mb-0.5">{c.title}</p>
+                  <p className="text-sm text-nidhi-text-secondary leading-relaxed">{c.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
+
       </div>
     </section>
   );

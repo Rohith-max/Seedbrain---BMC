@@ -8,11 +8,11 @@ import { Footer } from '@/components/landing/footer';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1">
+    <div className="min-h-screen">
+      <main>
         <HeroSection />
-        <IndiaFeaturesSection />
         <FeaturesSection />
+        <IndiaFeaturesSection />
         <AIOrchestration />
         <TrustSection />
       </main>

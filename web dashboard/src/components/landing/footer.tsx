@@ -6,7 +6,7 @@ import { Heart } from 'lucide-react';
 export function Footer() {
   return (
     <footer className="bg-nidhi-black border-t border-nidhi-border pt-16 pb-8">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="section-container">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           
           <div className="col-span-1 md:col-span-2">

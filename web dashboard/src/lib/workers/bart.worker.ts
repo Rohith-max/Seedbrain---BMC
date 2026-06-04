@@ -4,7 +4,7 @@ import { pipeline, env } from '@xenova/transformers';
 env.allowLocalModels = false;
 
 class PipelineSingleton {
-  static task = 'summarization';
+  static task: any = 'summarization';
   // Use a distilled BART model which is optimized for browser usage
   static model = 'Xenova/distilbart-cnn-6-6';
   static instance: any = null;
