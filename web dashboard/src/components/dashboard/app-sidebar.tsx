@@ -23,16 +23,18 @@ import {
 import { useAuthStore } from '@/lib/store/auth-store';
 
 const NAV = [
-  { href: '/dashboard',                   icon: Home,     label: 'Home' },
-  { href: '/dashboard/assistant',         icon: Bot,      label: 'AI Assistant' },
-  { href: '/dashboard/alerts',            icon: Bell,     label: 'Alerts',    badge: '3' },
-  { href: '/dashboard/benefits',          icon: Gift,     label: 'Benefits',  badge: '12' },
-  { href: '/dashboard/vault',             icon: Archive,  label: 'Documents' },
-  { href: '/dashboard/family',            icon: Users,    label: 'Family' },
-  { href: '/dashboard/knowledge-graph',   icon: Network,  label: 'Knowledge Graph' },
+  { href: '/dashboard',                   icon: Home,      label: 'Home' },
+  { href: '/dashboard/assistant',         icon: Bot,       label: 'AI Assistant' },
+  { href: '/dashboard/alerts',            icon: Bell,      label: 'Alerts',    badge: '3' },
+  { href: '/dashboard/benefits',          icon: Gift,      label: 'Benefits',  badge: '12' },
+  { href: '/dashboard/vault',             icon: Archive,   label: 'Documents' },
+  { href: '/dashboard/family',            icon: Users,     label: 'Family' },
+  { href: '/dashboard/knowledge-graph',   icon: Network,   label: 'Knowledge Graph' },
   { href: '/dashboard/analytics',         icon: BarChart3, label: 'Analytics' },
-  { href: '/dashboard/government-portals', icon: Globe,   label: 'Gov Portals' },
+  { href: '/dashboard/government-portals', icon: Globe,    label: 'Gov Portals' },
 ];
+
+const GOLD_GRADIENT = 'linear-gradient(135deg, #D4AF37, #E8D080)';
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -54,12 +56,15 @@ export function AppSidebar() {
       initial={false}
       animate={{ width: collapsed ? 72 : 240 }}
       transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-      className="hidden md:flex flex-col h-screen bg-nidhi-surface border-r border-nidhi-border-subtle flex-shrink-0 overflow-hidden z-30 relative"
+      className="hidden md:flex flex-col h-screen bg-nidhi-surface border-r border-nidhi-border-subtle flex-shrink-0 overflow-visible z-30 relative"
     >
       {/* Brand Row */}
-      <div className="px-4 pt-6 pb-4 flex items-center gap-3 min-h-[72px]">
+      <div className="px-4 pt-5 pb-4 flex items-center gap-3 min-h-[68px]">
         {/* Logo mark */}
-        <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center flex-shrink-0 glow-gold-sm">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 glow-gold-sm"
+          style={{ background: GOLD_GRADIENT }}
+        >
           <span className="text-nidhi-black font-bold text-base font-display select-none">न</span>
         </div>
 
@@ -93,7 +98,7 @@ export function AppSidebar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.18 }}
-            className="mx-3 mb-3"
+            className="mx-3 mb-2"
           >
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-nidhi-card border border-nidhi-border-subtle">
               <span className="relative flex h-2 w-2 flex-shrink-0">
@@ -109,7 +114,7 @@ export function AppSidebar() {
       </AnimatePresence>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto hide-scrollbar">
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto hide-scrollbar py-2">
         {NAV.map((item) => {
           const active = isActive(item.href);
           const Icon = item.icon;
@@ -156,7 +161,7 @@ export function AppSidebar() {
       </nav>
 
       {/* Bottom section */}
-      <div className="px-3 pb-5 space-y-1 border-t border-nidhi-border-subtle pt-3">
+      <div className="px-3 pb-4 space-y-1 border-t border-nidhi-border-subtle pt-3">
         {/* Settings */}
         <div title={collapsed ? 'Settings' : undefined}>
           <Link
@@ -194,9 +199,12 @@ export function AppSidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center gap-3 p-3 rounded-xl bg-nidhi-card border border-nidhi-border-subtle mt-2"
+              className="flex items-center gap-3 p-3 rounded-xl bg-nidhi-card border border-nidhi-border-subtle mt-1"
             >
-              <div className="w-8 h-8 rounded-lg gradient-gold flex items-center justify-center text-nidhi-black font-bold text-sm flex-shrink-0">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-nidhi-black font-bold text-sm flex-shrink-0"
+                style={{ background: GOLD_GRADIENT }}
+              >
                 {user?.name?.charAt(0) ?? 'R'}
               </div>
               <div className="flex-1 min-w-0">
@@ -233,10 +241,10 @@ export function AppSidebar() {
         </AnimatePresence>
       </div>
 
-      {/* Collapse Toggle — floating on right edge */}
+      {/* Collapse Toggle — on right edge, correctly positioned */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-[88px] w-6 h-6 rounded-full bg-nidhi-elevated border border-nidhi-border flex items-center justify-center text-nidhi-text-muted hover:text-nidhi-gold hover:border-nidhi-gold/30 transition-all z-40 shadow-md"
+        className="absolute right-0 translate-x-1/2 top-[80px] w-6 h-6 rounded-full bg-nidhi-elevated border border-nidhi-border flex items-center justify-center text-nidhi-text-muted hover:text-nidhi-gold hover:border-nidhi-gold/30 transition-all z-50 shadow-md"
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {collapsed ? (
