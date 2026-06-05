@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SeedBrain App Icon — Foreground Layer
+    Concept: A stylized brain with a sprouting seed/plant growing from its center top.
+    Colors: White brain silhouette + gold (#E9C46A) sprout accent on teal background.
+    Safe zone: Core artwork stays within the 72dp center (18dp margin each side).
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- ═══════════════════════════════════════
+         BRAIN SILHOUETTE (white, centered)
+         Brain sits from y≈46 to y≈80, x≈24 to x≈84
+         ═══════════════════════════════════════ -->
+
+    <!-- LEFT brain hemisphere -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M54,52
+            C54,52 50,50 46,50
+            C40,50 34,53 32,58
+            C29,63 29,69 31,73
+            C33,77 37,80 42,80
+            C44,80 46,79 48,78
+            C50,77 52,75 54,74
+            Z" />
+
+    <!-- LEFT hemisphere inner fold line -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#CC006D77"
+        android:strokeWidth="1.5"
+        android:pathData="M36,60 Q38,65 36,70" />
+
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#CC006D77"
+        android:strokeWidth="1.5"
+        android:pathData="M42,56 Q40,62 42,68" />
+
+    <!-- RIGHT brain hemisphere -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M54,52
+            C54,52 58,50 62,50
+            C68,50 74,53 76,58
+            C79,63 79,69 77,73
+            C75,77 71,80 66,80
+            C64,80 62,79 60,78
+            C58,77 56,75 54,74
+            Z" />
+
+    <!-- RIGHT hemisphere inner fold line -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#CC006D77"
+        android:strokeWidth="1.5"
+        android:pathData="M72,60 Q70,65 72,70" />
+
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#CC006D77"
+        android:strokeWidth="1.5"
+        android:pathData="M66,56 Q68,62 66,68" />
+
+    <!-- Brain center divider line -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#80006D77"
+        android:strokeWidth="1.2"
+        android:pathData="M54,52 L54,74" />
+
+    <!-- Bottom brain stem / connector -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M50,78 Q54,82 58,78 L58,80 Q54,85 50,80 Z" />
+
+    <!-- ═══════════════════════════════════════
+         SPROUT / SEED  (gold accent, grows from top of brain)
+         ═══════════════════════════════════════ -->
+
+    <!-- Main stem (gold) -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M53,52 Q53,44 54,38 Q55,44 55,52 Z" />
+
+    <!-- Left leaf -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="
+            M54,44
+            Q48,40 44,43
+            Q46,48 54,46
+            Z" />
+
+    <!-- Right leaf -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="
+            M54,41
+            Q60,37 64,40
+            Q62,45 54,43
+            Z" />
+
+    <!-- Seed dot at very top of sprout -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M54,38 m-2.5,0 a2.5,2.5 0 1,0 5,0 a2.5,2.5 0 1,0 -5,0" />
+
+    <!-- ═══════════════════════════════════════
+         SUBTLE SPARKLE DOTS (gold, scattered)
+         ═══════════════════════════════════════ -->
+
+    <!-- Top-left sparkle -->
+    <path
+        android:fillColor="#99E9C46A"
+        android:pathData="M34,40 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+
+    <!-- Top-right sparkle -->
+    <path
+        android:fillColor="#99E9C46A"
+        android:pathData="M74,38 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+
+    <!-- Bottom-right sparkle -->
+    <path
+        android:fillColor="#66E9C46A"
+        android:pathData="M76,76 m-1,0 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0" />
+
+</vector>

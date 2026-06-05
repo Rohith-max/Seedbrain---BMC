@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- NIDHI Brand Colors -->
+    <color name="primary">#006D77</color>
+    <color name="primary_variant">#004E57</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="secondary">#E9C46A</color>
+    <color name="secondary_variant">#C9A43A</color>
+    <color name="on_secondary">#1A1A1A</color>
+    <color name="background_light">#F8F9FA</color>
+    <color name="background_dark">#0D1117</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="surface_dark">#161B22</color>
+    <color name="error">#BA1A1A</color>
+    <color name="success">#2D6A4F</color>
+    <color name="warning">#E76F51</color>
+    <color name="glass_light">#CCF8F9FA</color>
+    <color name="glass_dark">#CC161B22</color>
+    <color name="splash_bg">#006D77</color>
+</resources>

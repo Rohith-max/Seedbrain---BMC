@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NIDHI</string>
+    <string name="app_tagline">Your Family\'s Financial Guardian</string>
+
+    <!-- Auth -->
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Create Account</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="enter_otp">Enter OTP</string>
+    <string name="verify">Verify</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="email_address">Email Address</string>
+    <string name="full_name">Full Name</string>
+    <string name="unlock_with_biometric">Unlock with Biometric</string>
+    <string name="enter_pin">Enter PIN</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_documents">Documents</string>
+    <string name="nav_benefits">Benefits</string>
+    <string name="nav_ai_chat">AI Assistant</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="health_score">Family Health Score</string>
+    <string name="upcoming_deadlines">Upcoming Deadlines</string>
+    <string name="recent_alerts">Recent Alerts</string>
+    <string name="ai_suggestions">AI Suggestions</string>
+
+    <!-- Documents -->
+    <string name="add_document">Add Document</string>
+    <string name="scan_document">Scan Document</string>
+    <string name="ocr_processing">Extracting text…</string>
+    <string name="ai_summary">AI Summary</string>
+    <string name="expiry_date">Expiry Date</string>
+
+    <!-- Benefits -->
+    <string name="eligible">Eligible</string>
+    <string name="missing_docs">Missing Docs</string>
+    <string name="ineligible">Ineligible</string>
+    <string name="check_eligibility">Check Eligibility</string>
+
+    <!-- Emergency -->
+    <string name="sos">SOS</string>
+    <string name="sos_description">Tap to send location and alert emergency contacts</string>
+    <string name="emergency_contacts">Emergency Contacts</string>
+
+    <!-- Settings -->
+    <string name="theme">Theme</string>
+    <string name="language">Language</string>
+    <string name="security">Security</string>
+    <string name="backup">Backup &amp; Restore</string>
+    <string name="demo_mode">Demo Mode</string>
+    <string name="sign_out">Sign Out</string>
+
+    <!-- Demo -->
+    <string name="demo_banner">Demo Mode – Tap to reset</string>
+    <string name="demo_description">Exploring NIDHI with sample data. Your real data is safe.</string>
+
+    <!-- Permissions -->
+    <string name="permission_camera">Camera access is needed to scan documents</string>
+    <string name="permission_contacts">Contacts access links your family members</string>
+    <string name="permission_location">Location is used only during SOS emergencies</string>
+    <string name="permission_microphone">Microphone is needed for voice input</string>
+    <string name="permission_denied">Permission denied. Please enable in Settings.</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_network">No internet connection.</string>
+    <string name="error_ocr">Could not extract text from the document.</string>
+    <string name="error_ai">AI service unavailable. Please try later.</string>
+</resources>
