@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  nidhi-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=production-secret-key-change-me
+    restart: unless-stopped
