@@ -19,7 +19,7 @@ export function Topbar() {
   };
 
   return (
-    <header className="h-16 border-b border-nidhi-border/50 bg-nidhi-black/40 backdrop-blur-xl sticky top-0 z-30 flex items-center justify-between px-6 md:pl-80">
+    <header className="h-16 border-b border-nidhi-border/50 bg-nidhi-black/95 flex items-center justify-between px-6 flex-shrink-0 z-30">
       
       {/* Search & Global Intelligence */}
       <div className="flex-1 max-w-xl">
@@ -32,13 +32,13 @@ export function Topbar() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative w-10 h-10 rounded-lg glass-strong hover:glass-premium transition-all flex items-center justify-center group"
+          className="relative w-10 h-10 rounded-lg bg-nidhi-surface/60 hover:bg-nidhi-card border border-nidhi-border-subtle transition-all flex items-center justify-center group"
         >
           <Bell className="w-5 h-5 text-nidhi-text-secondary group-hover:text-nidhi-gold transition-colors" />
           <motion.span
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-nidhi-danger rounded-full border border-nidhi-black/80 glow-neon"
+            className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-nidhi-danger rounded-full border border-nidhi-black/80"
           />
         </motion.button>
 
@@ -46,17 +46,14 @@ export function Topbar() {
         <div className="hidden md:block h-6 w-px bg-nidhi-border/30" />
 
         {/* Profile Menu */}
-        <motion.div
-          initial={false}
-          className="relative"
-        >
+        <div className="relative">
           <motion.button
             whileHover={{ scale: 1.02 }}
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center gap-2 px-3 h-10 rounded-lg glass-strong hover:glass-premium transition-all group"
+            className="flex items-center gap-2 px-3 h-10 rounded-lg bg-nidhi-surface/60 hover:bg-nidhi-card border border-nidhi-border-subtle transition-all group"
           >
             {/* Avatar */}
-            <div className="w-8 h-8 rounded-lg bg-gradient-gold flex items-center justify-center text-white font-bold text-sm flex-shrink-0 group-hover:shadow-lg transition-shadow">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-nidhi-gold to-nidhi-gold-dim flex items-center justify-center text-nidhi-black font-bold text-sm flex-shrink-0">
               {user?.name?.charAt(0) || 'U'}
             </div>
 
@@ -88,7 +85,7 @@ export function Topbar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-2 w-48 rounded-xl glass-premium border border-nidhi-gold/20 overflow-hidden shadow-2xl z-50"
+                className="absolute right-0 mt-2 w-48 rounded-xl bg-nidhi-surface border border-nidhi-gold/20 overflow-hidden shadow-2xl z-50"
               >
                 {/* User Info */}
                 <div className="px-4 py-3 border-b border-nidhi-border/30 bg-nidhi-surface/40">
@@ -103,7 +100,7 @@ export function Topbar() {
                   <motion.button
                     whileHover={{ x: 4 }}
                     onClick={() => router.push('/dashboard/settings')}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-nidhi-text hover:bg-nidhi-surface/60 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-nidhi-text hover:bg-nidhi-card transition-colors"
                   >
                     <Settings className="w-4 h-4 text-nidhi-gold" />
                     Settings
@@ -121,7 +118,7 @@ export function Topbar() {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
     </header>
   );

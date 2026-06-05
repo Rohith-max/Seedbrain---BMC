@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 export function TrustSection() {
   return (
     <section className="py-24 bg-nidhi-deep">
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="section-container">
         
         <div className="text-center max-w-2xl mx-auto mb-16">
           <Shield className="w-12 h-12 text-nidhi-success mx-auto mb-6" aria-hidden="true" />

@@ -9,7 +9,7 @@ export function AIOrchestration() {
       {/* Ambient BG */}
       <div className="absolute inset-0 bg-nidhi-black z-0"></div>
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="section-container relative z-10">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           
           <div className="lg:w-1/2">

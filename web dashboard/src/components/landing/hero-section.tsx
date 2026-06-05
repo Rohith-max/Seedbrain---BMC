@@ -26,7 +26,7 @@ export function HeroSection() {
         <div className="gradient-mesh absolute inset-0 opacity-50"></div>
       </div>
 
-      <div className="container relative z-10 mx-auto px-4 md:px-6 flex flex-col items-center text-center">
+      <div className="section-container relative z-10 flex flex-col items-center text-center">
         {/* Badge */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

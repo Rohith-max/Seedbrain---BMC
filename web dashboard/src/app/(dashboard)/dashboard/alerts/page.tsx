@@ -32,26 +32,27 @@ export default function AlertsPage() {
   const resolved = alerts.filter(a => a.status === 'resolved');
 
   return (
-    <div className="min-h-screen px-8 py-10 max-w-3xl mx-auto space-y-10">
+    <div style={{ minHeight: '100vh', padding: '48px 40px', maxWidth: '780px', display: 'flex', flexDirection: 'column', gap: '48px' }}>
 
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-1"
+        style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
       >
         <p className="section-label">Sharma Family</p>
-        <h1 className="text-4xl font-display font-bold text-nidhi-text">Alerts</h1>
-        <p className="text-nidhi-text-secondary">
+        <h1 style={{ fontSize: '40px', fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--color-nidhi-text)', lineHeight: 1.1 }}>
+          Alerts
+        </h1>
+        <p style={{ fontSize: '16px', color: 'var(--color-nidhi-text-secondary)', marginTop: '4px' }}>
           {active.length} active &middot; {resolved.length} resolved
         </p>
       </motion.div>
 
       {/* Active alerts */}
-      <div className="space-y-3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {active.map((alert, idx) => {
           const cfg = PRIORITY_CONFIG[alert.priority as keyof typeof PRIORITY_CONFIG] ?? PRIORITY_CONFIG.medium;
-          const Icon = cfg.icon;
           const rel = formatRelativeDate(alert.dueDate);
           const isUrgent = alert.priority === 'critical' || alert.priority === 'high';
 
@@ -62,36 +63,71 @@ export default function AlertsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: idx * 0.06 }}
               whileHover={{ y: -2 }}
-              className={`card-premium p-6 group ${isUrgent ? 'border-nidhi-border-subtle hover:border-nidhi-warning/30' : ''}`}
+              className={`card-premium group ${isUrgent ? 'border-nidhi-border-subtle hover:border-nidhi-warning/30' : ''}`}
+              style={{ padding: '24px' }}
             >
-              <div className="flex items-start gap-4">
-                {/* Icon dot */}
-                <div className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                {/* Priority dot */}
+                <div
+                  className={cfg.dot}
+                  style={{ marginTop: '6px', width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0 }}
+                />
 
                 {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3 mb-1">
-                    <h3 className="text-base font-semibold text-nidhi-text leading-tight">{alert.title}</h3>
-                    <span className={`flex-shrink-0 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
-                      alert.priority === 'critical' ? 'bg-nidhi-danger/10 text-nidhi-danger border-nidhi-danger/20' :
-                      alert.priority === 'high'     ? 'bg-nidhi-warning/10 text-nidhi-warning border-nidhi-warning/20' :
-                      'bg-nidhi-border-subtle text-nidhi-text-muted border-nidhi-border-subtle'
-                    }`}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Title row */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '10px' }}>
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-nidhi-text)', lineHeight: 1.35 }}>
+                      {alert.title}
+                    </h3>
+                    <span
+                      style={{
+                        flexShrink: 0,
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid',
+                        ...(alert.priority === 'critical'
+                          ? { background: 'rgba(239,68,68,0.1)', color: 'var(--color-nidhi-danger)', borderColor: 'rgba(239,68,68,0.2)' }
+                          : alert.priority === 'high'
+                          ? { background: 'rgba(245,158,11,0.1)', color: 'var(--color-nidhi-warning)', borderColor: 'rgba(245,158,11,0.2)' }
+                          : { background: 'var(--color-nidhi-elevated)', color: 'var(--color-nidhi-text-muted)', borderColor: 'var(--color-nidhi-border-subtle)' })
+                      }}
+                    >
                       {cfg.label}
                     </span>
                   </div>
-                  <p className="text-sm text-nidhi-text-secondary leading-relaxed mb-4">{alert.description}</p>
 
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-1.5 text-xs text-nidhi-text-muted">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>Due: {new Date(alert.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                      <span className={`font-semibold ${isUrgent ? cfg.text : ''}`}>({rel})</span>
+                  {/* Description */}
+                  <p style={{ fontSize: '14px', color: 'var(--color-nidhi-text-secondary)', lineHeight: 1.65, marginBottom: '20px' }}>
+                    {alert.description}
+                  </p>
+
+                  {/* Footer row */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--color-nidhi-text-muted)' }}>
+                      <Calendar style={{ width: '14px', height: '14px' }} />
+                      <span>
+                        Due: {new Date(alert.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                      <span
+                        style={{
+                          fontWeight: 600,
+                          color: isUrgent
+                            ? (alert.priority === 'critical' ? 'var(--color-nidhi-danger)' : 'var(--color-nidhi-warning)')
+                            : 'var(--color-nidhi-text-muted)'
+                        }}
+                      >
+                        ({rel})
+                      </span>
                     </div>
 
                     <motion.button
                       whileHover={{ x: 2 }}
-                      className="text-xs font-semibold text-nidhi-gold hover:text-nidhi-gold-light transition-colors"
+                      style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-nidhi-gold)', background: 'none', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
                     >
                       {alert.actionLabel || 'Take Action'} →
                     </motion.button>
@@ -106,28 +142,30 @@ export default function AlertsPage() {
       {/* Resolved */}
       {resolved.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-nidhi-text-muted uppercase tracking-widest mb-4 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-nidhi-success" />
-            Resolved ({resolved.length})
-          </h2>
-          <div className="space-y-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <CheckCircle2 style={{ width: '16px', height: '16px', color: 'var(--color-nidhi-success)' }} />
+            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-nidhi-text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Resolved ({resolved.length})
+            </span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {resolved.map((alert, idx) => (
               <motion.div
                 key={alert.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 0.5 }}
                 transition={{ delay: idx * 0.05 }}
-                className="flex items-center gap-3 px-5 py-4 rounded-xl border border-nidhi-border-subtle bg-nidhi-card/50"
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', borderRadius: '12px', border: '1px solid var(--color-nidhi-border-subtle)', background: 'var(--color-nidhi-card)' }}
               >
-                <CheckCircle2 className="w-4 h-4 text-nidhi-success flex-shrink-0" />
-                <p className="text-sm text-nidhi-text-secondary line-through">{alert.title}</p>
+                <CheckCircle2 style={{ width: '16px', height: '16px', color: 'var(--color-nidhi-success)', flexShrink: 0 }} />
+                <p style={{ fontSize: '14px', color: 'var(--color-nidhi-text-secondary)', textDecoration: 'line-through' }}>{alert.title}</p>
               </motion.div>
             ))}
           </div>
         </div>
       )}
 
-      <div className="h-8" />
+      <div style={{ height: '32px' }} />
     </div>
   );
 }

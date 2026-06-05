@@ -13,26 +13,26 @@ const CATEGORY_LABELS: Record<string, string> = {
   financial:         'Financial',
 };
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  government_scheme: { bg: 'bg-nidhi-success/8',  text: 'text-nidhi-success', border: 'border-nidhi-success/20' },
-  scholarship:       { bg: 'bg-nidhi-gold/8',     text: 'text-nidhi-gold',    border: 'border-nidhi-gold/20'    },
-  tax_benefit:       { bg: 'bg-nidhi-info/8',     text: 'text-nidhi-info',    border: 'border-nidhi-border-subtle'    },
-  financial:         { bg: 'bg-purple-500/8',     text: 'text-purple-400',    border: 'border-purple-500/20'    },
+const CATEGORY_COLORS: Record<string, { bg: string; color: string; border: string }> = {
+  government_scheme: { bg: 'rgba(34,197,94,0.08)',   color: 'var(--color-nidhi-success)', border: 'rgba(34,197,94,0.2)'   },
+  scholarship:       { bg: 'rgba(212,175,55,0.08)',  color: 'var(--color-nidhi-gold)',    border: 'rgba(212,175,55,0.2)'  },
+  tax_benefit:       { bg: 'rgba(59,130,246,0.08)',  color: 'var(--color-nidhi-info)',    border: 'var(--color-nidhi-border-subtle)' },
+  financial:         { bg: 'rgba(168,85,247,0.08)',  color: '#a78bfa',                   border: 'rgba(168,85,247,0.2)'  },
 };
 
 function MatchBar({ score }: { score: number }) {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex-1 h-1.5 bg-nidhi-border-subtle rounded-full overflow-hidden">
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ flex: 1, height: '6px', background: 'var(--color-nidhi-border-subtle)', borderRadius: '99px', overflow: 'hidden' }}>
         <motion.div
-          className="h-full rounded-full bg-gradient-to-r from-nidhi-gold to-nidhi-gold-light"
+          style={{ height: '100%', borderRadius: '99px', background: 'linear-gradient(to right, #D4AF37, #E8D080)' }}
           initial={{ width: 0 }}
           whileInView={{ width: `${score * 100}%` }}
           transition={{ duration: 1, ease: 'easeOut' }}
           viewport={{ once: true }}
         />
       </div>
-      <span className="text-xs font-semibold text-nidhi-gold w-9 text-right">
+      <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-nidhi-gold)', width: '36px', textAlign: 'right' }}>
         {Math.round(score * 100)}%
       </span>
     </div>
@@ -47,133 +47,108 @@ export default function BenefitsPage() {
   }, []);
 
   const eligible = benefits.filter(b => b.status === 'eligible');
-
   const totalValue = '₹8.9L+';
 
   return (
-    <div className="min-h-screen px-8 py-10 max-w-4xl mx-auto space-y-12">
+    <div style={{ minHeight: '100vh', padding: '48px 40px', maxWidth: '900px', display: 'flex', flexDirection: 'column', gap: '48px' }}>
 
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-1"
-      >
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4 text-nidhi-gold" />
+      <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+        style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Sparkles style={{ width: '16px', height: '16px', color: 'var(--color-nidhi-gold)' }} />
           <p className="section-label">AI Discovered</p>
         </div>
-        <h1 className="text-4xl font-display font-bold text-nidhi-text">Benefits</h1>
-        <p className="text-nidhi-text-secondary">Money your family is leaving on the table.</p>
+        <h1 style={{ fontSize: '40px', fontFamily: 'var(--font-display)', fontWeight: 700, color: 'var(--color-nidhi-text)', lineHeight: 1.1 }}>Benefits</h1>
+        <p style={{ fontSize: '16px', color: 'var(--color-nidhi-text-secondary)' }}>Money your family is leaving on the table.</p>
       </motion.div>
 
       {/* Total value hero */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="relative overflow-hidden rounded-2xl border border-nidhi-gold/20 bg-nidhi-card p-8"
-      >
-        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-nidhi-gold/5 blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6 justify-between">
-          <div>
-            <p className="text-nidhi-text-muted text-sm mb-1">Total discoverable value</p>
-            <div className="flex items-end gap-2">
-              <span className="text-5xl font-display font-bold text-gold">{totalValue}</span>
-            </div>
-            <p className="text-sm text-nidhi-text-secondary mt-2">
-              Across {eligible.length} government schemes, scholarships & tax benefits
-            </p>
+      <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.1 }}
+        style={{ position: 'relative', overflow: 'hidden', borderRadius: '16px', border: '1px solid rgba(212,175,55,0.2)', background: 'var(--color-nidhi-card)', padding: '32px' }}>
+        <div style={{ position: 'absolute', top: '-64px', right: '-64px', width: '224px', height: '224px', borderRadius: '50%', background: 'rgba(212,175,55,0.05)', filter: 'blur(48px)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <p style={{ fontSize: '13px', color: 'var(--color-nidhi-text-muted)' }}>Total discoverable value</p>
+            <span style={{ fontSize: '48px', fontFamily: 'var(--font-display)', fontWeight: 700, background: 'linear-gradient(135deg,#D4AF37,#E8D080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{totalValue}</span>
+            <p style={{ fontSize: '14px', color: 'var(--color-nidhi-text-secondary)' }}>Across {eligible.length} government schemes, scholarships & tax benefits</p>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="btn-primary self-start md:self-auto"
-          >
-            Claim All Benefits
-            <ArrowRight className="w-4 h-4" />
+          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="btn-primary">
+            Claim All Benefits <ArrowRight style={{ width: '16px', height: '16px' }} />
           </motion.button>
         </div>
       </motion.div>
 
       {/* Benefits list */}
-      <div className="space-y-4">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {eligible.map((benefit, idx) => {
           const colors = CATEGORY_COLORS[benefit.category] ?? CATEGORY_COLORS.financial;
           return (
-            <motion.div
-              key={benefit.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+            <motion.div key={benefit.id}
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.15 + idx * 0.08 }}
               whileHover={{ y: -3 }}
-              className="group card-premium p-7 cursor-pointer"
-            >
+              className="card-premium"
+              style={{ padding: '28px', cursor: 'pointer' }}>
+
               {/* Top row */}
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className={`badge text-[11px] ${colors.bg} ${colors.text} border ${colors.border}`}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '16px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 500, padding: '3px 10px', borderRadius: '99px', background: colors.bg, color: colors.color, border: `1px solid ${colors.border}` }}>
                       {CATEGORY_LABELS[benefit.category] ?? benefit.category}
                     </span>
                     {benefit.matchedMembers.length > 0 && (
-                      <span className="text-[11px] text-nidhi-text-muted">
+                      <span style={{ fontSize: '11px', color: 'var(--color-nidhi-text-muted)' }}>
                         for {benefit.matchedMembers.slice(0, 2).join(', ')}
                       </span>
                     )}
                   </div>
-                  <h3 className="text-xl font-semibold text-nidhi-text leading-tight">{benefit.title}</h3>
+                  <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--color-nidhi-text)', lineHeight: 1.35 }}>{benefit.title}</h3>
                 </div>
-                {/* Value */}
-                <div className="flex-shrink-0 text-right">
-                  <div className="flex items-center gap-1 justify-end">
-                    <IndianRupee className="w-4 h-4 text-nidhi-gold" />
-                    <span className="text-lg font-bold text-nidhi-gold">
+                <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
+                    <IndianRupee style={{ width: '16px', height: '16px', color: 'var(--color-nidhi-gold)' }} />
+                    <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--color-nidhi-gold)' }}>
                       {(benefit.estimatedValue ?? '').replace('₹', '')}
                     </span>
                   </div>
-                  <span className="text-[10px] text-nidhi-text-muted">estimated value</span>
+                  <span style={{ fontSize: '10px', color: 'var(--color-nidhi-text-muted)' }}>estimated value</span>
                 </div>
               </div>
 
-              <p className="text-sm text-nidhi-text-secondary leading-relaxed mb-5">{benefit.description}</p>
+              <p style={{ fontSize: '14px', color: 'var(--color-nidhi-text-secondary)', lineHeight: 1.65, marginBottom: '20px' }}>{benefit.description}</p>
 
               {/* Match score */}
-              <div className="mb-5">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-nidhi-text-muted">Match confidence</span>
-                </div>
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ fontSize: '12px', color: 'var(--color-nidhi-text-muted)', marginBottom: '8px' }}>Match confidence</p>
                 <MatchBar score={benefit.matchScore} />
               </div>
 
               {/* Documents needed */}
-              <div className="flex flex-wrap gap-2 mb-5">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '20px' }}>
                 {benefit.requiredDocuments.slice(0, 3).map((doc) => (
-                  <span key={doc} className="text-[11px] px-2.5 py-1 rounded-lg bg-nidhi-elevated text-nidhi-text-secondary border border-nidhi-border-subtle">
+                  <span key={doc} style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '8px', background: 'var(--color-nidhi-elevated)', color: 'var(--color-nidhi-text-secondary)', border: '1px solid var(--color-nidhi-border-subtle)' }}>
                     {doc}
                   </span>
                 ))}
                 {benefit.requiredDocuments.length > 3 && (
-                  <span className="text-[11px] px-2.5 py-1 rounded-lg bg-nidhi-elevated text-nidhi-text-muted border border-nidhi-border-subtle">
+                  <span style={{ fontSize: '11px', padding: '4px 10px', borderRadius: '8px', background: 'var(--color-nidhi-elevated)', color: 'var(--color-nidhi-text-muted)', border: '1px solid var(--color-nidhi-border-subtle)' }}>
                     +{benefit.requiredDocuments.length - 3} more
                   </span>
                 )}
               </div>
 
               {/* Action */}
-              <div className="flex items-center justify-between">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 {benefit.deadline && (
-                  <span className="text-xs text-nidhi-warning">
+                  <span style={{ fontSize: '12px', color: 'var(--color-nidhi-warning)' }}>
                     Deadline: {new Date(benefit.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                 )}
-                <motion.button
-                  whileHover={{ x: 3 }}
-                  className="ml-auto flex items-center gap-1.5 text-sm font-semibold text-nidhi-gold group-hover:text-nidhi-gold-light transition-colors"
-                >
-                  Start Application
-                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <motion.button whileHover={{ x: 3 }}
+                  style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: 600, color: 'var(--color-nidhi-gold)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  Start Application <ChevronRight style={{ width: '16px', height: '16px' }} />
                 </motion.button>
               </div>
             </motion.div>
@@ -181,7 +156,7 @@ export default function BenefitsPage() {
         })}
       </div>
 
-      <div className="h-8" />
+      <div style={{ height: '32px' }} />
     </div>
   );
 }
