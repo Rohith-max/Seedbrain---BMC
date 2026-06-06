@@ -11,12 +11,15 @@ import com.nidhi.app.data.remote.LlmApiService
 import com.nidhi.app.data.remote.SimulatedLlmEngine
 import com.nidhi.app.data.repository.*
 import com.nidhi.app.domain.repository.*
+import com.nidhi.app.feature.auth.BiometricHelper
+import com.nidhi.app.feature.auth.SessionBiometricCache
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -28,7 +31,8 @@ val appModule = module {
     // ── Database ──────────────────────────────────────────────────────────────
     single {
         Room.databaseBuilder(androidContext(), AppDatabase::class.java, "nidhi_db")
-            .fallbackToDestructiveMigration()
+            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .fallbackToDestructiveMigration()   // safety net for dev builds
             .build()
     }
     single { get<AppDatabase>().userDao() }
@@ -36,6 +40,7 @@ val appModule = module {
     single { get<AppDatabase>().benefitDao() }
     single { get<AppDatabase>().alertDao() }
     single { get<AppDatabase>().conversationDao() }
+    single { get<AppDatabase>().tombstoneDao() }
 
     // ── Moshi ─────────────────────────────────────────────────────────────────
     single {
@@ -44,7 +49,7 @@ val appModule = module {
             .build()
     }
 
-    // ── OkHttp + Retrofit ─────────────────────────────────────────────────────
+    // ── OkHttp — standard client ──────────────────────────────────────────────
     single {
         val logging = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG)
@@ -56,6 +61,22 @@ val appModule = module {
             .addInterceptor(logging)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    // ── OkHttp — streaming client (no response buffering, 30s read timeout) ──
+    single(named("streaming")) {
+        val logging = HttpLoggingInterceptor().apply {
+            level = if (BuildConfig.DEBUG)
+                HttpLoggingInterceptor.Level.HEADERS   // don't buffer SSE body in logs
+            else
+                HttpLoggingInterceptor.Level.NONE
+        }
+        OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)   // 30s read timeout for streaming (Req 8.6)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
     }
@@ -81,12 +102,36 @@ val appModule = module {
     // ── Simulated LLM engine ──────────────────────────────────────────────────
     singleOf(::SimulatedLlmEngine)
 
+    // ── Biometric helpers ─────────────────────────────────────────────────────
+    single { BiometricHelper(androidContext()) }
+    single { SessionBiometricCache() }
+
     // ── Repositories ──────────────────────────────────────────────────────────
     singleOf(::AuthRepositoryImpl) bind AuthRepository::class
     singleOf(::UserRepositoryImpl) bind UserRepository::class
-    singleOf(::DocumentRepositoryImpl) bind DocumentRepository::class
+
+    // DocumentRepositoryImpl now takes TombstoneDao — updated constructor
+    single<DocumentRepository> {
+        DocumentRepositoryImpl(
+            documentDao    = get(),
+            tombstoneDao   = get(),
+            llmApiService  = get(),
+            simulatedLlm   = get(),
+            moshi          = get(),
+            context        = androidContext()
+        )
+    }
+
     singleOf(::BenefitRepositoryImpl) bind BenefitRepository::class
     singleOf(::AlertRepositoryImpl) bind AlertRepository::class
-    // AiRepositoryImpl uses kotlinx.serialization directly (no Moshi) to avoid type mismatch crashes
-    single<AiRepository> { AiRepositoryImpl(get(), get(), get()) }
+
+    // AiRepositoryImpl now takes DocumentDao for document-context injection
+    single<AiRepository> {
+        AiRepositoryImpl(
+            conversationDao = get(),
+            documentDao     = get(),
+            llmApiService   = get(),
+            simulatedLlm    = get()
+        )
+    }
 }

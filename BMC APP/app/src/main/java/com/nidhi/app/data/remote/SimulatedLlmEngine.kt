@@ -12,10 +12,18 @@ import kotlinx.coroutines.delay
  */
 class SimulatedLlmEngine {
 
-    /** Returns a simulated chat reply with a realistic ~600ms delay. */
-    suspend fun chat(userMessage: String): String {
+    /**
+     * Returns a simulated chat reply with a realistic ~650ms delay.
+     * When [documentContext] is non-blank, prepends a "I can see you have N document(s) stored."
+     * prefix to the response (satisfies Requirement 9.4).
+     */
+    suspend fun chat(userMessage: String, documentContext: String = ""): String {
         delay(650) // simulate network latency
-        return buildResponse(userMessage.lowercase().trim())
+        val prefix = if (documentContext.isNotBlank()) {
+            val count = documentContext.lines().count { it.trimStart().startsWith("[") }
+            "I can see you have $count document(s) stored. "
+        } else ""
+        return prefix + buildResponse(userMessage.lowercase().trim())
     }
 
     /** Returns a simulated document summary for the given OCR text. */

@@ -14,6 +14,10 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE uid = :uid")
     suspend fun getUserOnce(uid: String): UserEntity?
 
+    /** Suspend alias used by FirestoreSyncWorker. */
+    @Query("SELECT * FROM users WHERE uid = :uid")
+    suspend fun getUserById(uid: String): UserEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertUser(user: UserEntity)
 
@@ -31,4 +35,8 @@ interface UserDao {
 
     @Query("SELECT * FROM family_members WHERE id = :id")
     suspend fun getFamilyMemberById(id: String): FamilyMemberEntity?
+
+    /** Returns all family members for a user as a plain list (used by sync push). */
+    @Query("SELECT * FROM family_members WHERE userId = :userId")
+    suspend fun getFamilyMembersDirect(userId: String): List<FamilyMemberEntity>
 }

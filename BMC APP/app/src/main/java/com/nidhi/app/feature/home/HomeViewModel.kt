@@ -16,6 +16,7 @@ data class HomeUiState(
     val unreadAlerts: List<Alert> = emptyList(),
     val unreadAlertCount: Int = 0,
     val eligibleBenefitsCount: Int = 0,
+    val familyMemberCount: Int = 0,  // used for the "add family members" prompt (Req 16.7)
     val isDemoMode: Boolean = false,
     val error: String? = null
 )
@@ -42,8 +43,9 @@ class HomeViewModel(
                 documentRepository.getUpcomingExpiryDocuments(userId),
                 alertRepository.getUnreadAlerts(userId),
                 alertRepository.getUnreadCount(userId),
-                benefitRepository.getEligibleCount()
-            ) { docs, alerts, alertCount, benefitCount ->
+                benefitRepository.getEligibleCount(),
+                userRepository.getFamilyMembers(userId)
+            ) { docs, alerts, alertCount, benefitCount, members ->
                 HomeUiState(
                     isLoading = false,
                     userName = "User",
@@ -52,6 +54,7 @@ class HomeViewModel(
                     unreadAlerts = alerts.take(5),
                     unreadAlertCount = alertCount,
                     eligibleBenefitsCount = benefitCount,
+                    familyMemberCount = members.size,
                     isDemoMode = isDemo
                 )
             }.catch { e -> _uiState.update { it.copy(isLoading = false, error = e.message) } }

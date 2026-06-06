@@ -68,8 +68,22 @@ class AiViewModel(
             aiRepository.sendMessage(currentConversationId, text).collect { result ->
                 when (result) {
                     is Result.Success -> {
-                        _chatDetailState.update { it.copy(messages = it.messages + result.data, isTyping = false) }
-                        persist(result.data)
+                        // For streaming, multiple emissions share the same message ID.
+                        // Replace the existing message with that ID (streaming updates),
+                        // or append if it's a brand-new message.
+                        _chatDetailState.update { state ->
+                            val existing = state.messages.indexOfFirst { it.id == result.data.id }
+                            val updatedMessages = if (existing >= 0) {
+                                state.messages.toMutableList().also { it[existing] = result.data }
+                            } else {
+                                state.messages + result.data
+                            }
+                            state.copy(
+                                messages = updatedMessages,
+                                isTyping = result.data.isStreaming   // still typing while streaming
+                            )
+                        }
+                        if (!result.data.isStreaming) persist(result.data)
                     }
                     is Result.Error -> _chatDetailState.update { it.copy(isTyping = false, error = result.message) }
                     is Result.Loading -> Unit

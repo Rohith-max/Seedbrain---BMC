@@ -18,6 +18,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.nidhi.app.domain.model.Benefit
 import com.nidhi.app.domain.model.BenefitStatus
 import com.nidhi.app.ui.components.CardSkeleton
+import com.nidhi.app.ui.components.EmptyState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,15 +68,18 @@ fun BenefitsScreen(
                     items(5) { CardSkeleton(Modifier.fillMaxWidth().height(100.dp)) }
                 }
             } else if (filtered.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Default.SearchOff, null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.outline)
-                        Spacer(Modifier.height(16.dp))
-                        Text("No benefits in this category",
-                            color = MaterialTheme.colorScheme.outline)
-                    }
+                // Eligibility filter empty state (Req 16.5)
+                val isEligibilityFilter = uiState.selectedFilter == BenefitFilter.ELIGIBLE
+                if (isEligibilityFilter) {
+                    EmptyState(
+                        icon = Icons.Default.SearchOff,
+                        message = "No eligible schemes found. Add family members and documents to improve your score."
+                    )
+                } else {
+                    EmptyState(
+                        icon = Icons.Default.SearchOff,
+                        message = "No benefits in this category"
+                    )
                 }
             } else {
                 LazyColumn(

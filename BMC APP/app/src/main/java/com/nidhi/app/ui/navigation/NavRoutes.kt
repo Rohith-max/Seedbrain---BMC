@@ -38,4 +38,8 @@ object NavRoutes {
         val encodedTitle = android.net.Uri.encode(title)
         return "webview/$encoded/$encodedTitle"
     }
+
+    // Chat with a pre-filled prompt (from Benefits → Ask AI, Req 10.1)
+    const val CHAT_WITH_PROMPT = "chat_prompt/{encodedPrompt}"
+    fun chatWithPrompt(encodedPrompt: String) = "chat_prompt/$encodedPrompt"
 }

@@ -6,6 +6,8 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -98,18 +100,17 @@ fun NidhiNavHost(
             navController = navController,
             startDestination = startDest,
             modifier = Modifier.padding(innerPadding),
+            // Default: slide for sub-screens (detail views)
             enterTransition = {
                 slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Start,
-                    tween(300)
+                    AnimatedContentTransitionScope.SlideDirection.Start, tween(300)
                 )
             },
-            exitTransition = { fadeOut(tween(200)) },
-            popEnterTransition = { fadeIn(tween(200)) },
+            exitTransition = { fadeOut(tween(150)) },
+            popEnterTransition = { fadeIn(tween(150)) },
             popExitTransition = {
                 slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.End,
-                    tween(300)
+                    AnimatedContentTransitionScope.SlideDirection.End, tween(300)
                 )
             }
         ) {
@@ -146,8 +147,14 @@ fun NidhiNavHost(
                 )
             }
 
-            // ── Main ──────────────────────────────────────────────────────────
-            composable(NavRoutes.HOME) {
+            // ── Main (top-level) — fade-through transitions (Req 17.1) ──────
+            composable(
+                NavRoutes.HOME,
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition  = { fadeOut(tween(150)) },
+                popEnterTransition = { fadeIn(tween(300)) },
+                popExitTransition  = { fadeOut(tween(150)) }
+            ) {
                 HomeScreen(
                     onNavigateToDocuments = { navController.navigate(NavRoutes.DOCUMENTS) },
                     onNavigateToBenefits = { navController.navigate(NavRoutes.BENEFITS) },
@@ -155,7 +162,13 @@ fun NidhiNavHost(
                     onNavigateToEmergency = { navController.navigate(NavRoutes.EMERGENCY) }
                 )
             }
-            composable(NavRoutes.DOCUMENTS) {
+            composable(
+                NavRoutes.DOCUMENTS,
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition  = { fadeOut(tween(150)) },
+                popEnterTransition = { fadeIn(tween(300)) },
+                popExitTransition  = { fadeOut(tween(150)) }
+            ) {
                 DocumentsScreen(
                     onDocumentClick = { id ->
                         navController.navigate(NavRoutes.documentDetail(id))
@@ -163,14 +176,26 @@ fun NidhiNavHost(
                     onAddDocument = { navController.navigate(NavRoutes.DOCUMENT_CAPTURE) }
                 )
             }
-            composable(NavRoutes.BENEFITS) {
+            composable(
+                NavRoutes.BENEFITS,
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition  = { fadeOut(tween(150)) },
+                popEnterTransition = { fadeIn(tween(300)) },
+                popExitTransition  = { fadeOut(tween(150)) }
+            ) {
                 BenefitsScreen(
                     onBenefitClick = { id ->
                         navController.navigate(NavRoutes.benefitDetail(id))
                     }
                 )
             }
-            composable(NavRoutes.AI_CHAT) {
+            composable(
+                NavRoutes.AI_CHAT,
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition  = { fadeOut(tween(150)) },
+                popEnterTransition = { fadeIn(tween(300)) },
+                popExitTransition  = { fadeOut(tween(150)) }
+            ) {
                 AiChatListScreen(
                     onConversationClick = { id ->
                         navController.navigate(NavRoutes.chatDetail(id))
@@ -180,7 +205,13 @@ fun NidhiNavHost(
                     }
                 )
             }
-            composable(NavRoutes.SETTINGS) {
+            composable(
+                NavRoutes.SETTINGS,
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition  = { fadeOut(tween(150)) },
+                popEnterTransition = { fadeIn(tween(300)) },
+                popExitTransition  = { fadeOut(tween(150)) }
+            ) {
                 SettingsScreen(
                     onNavigateToFamilyMembers = { navController.navigate(NavRoutes.FAMILY_MEMBERS) },
                     onSignOut = {
@@ -227,11 +258,32 @@ fun NidhiNavHost(
                     onBack = { navController.navigateUp() },
                     onOpenUrl = { url, title ->
                         navController.navigate(NavRoutes.webView(url, title))
+                    },
+                    onAskAi = { prompt ->
+                        // Navigate to a new chat session pre-seeded with the eligibility prompt
+                        val encodedPrompt = android.util.Base64.encodeToString(
+                            prompt.toByteArray(),
+                            android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP
+                        )
+                        navController.navigate(NavRoutes.chatWithPrompt(encodedPrompt))
                     }
                 )
             }
             composable(NavRoutes.FAMILY_MEMBERS) {
                 FamilyMembersScreen(onBack = { navController.navigateUp() })
+            }
+
+            // ── Chat with pre-filled eligibility prompt (Req 10.1) ──────────────
+            composable(NavRoutes.CHAT_WITH_PROMPT) { backStack ->
+                val encodedPrompt = backStack.arguments?.getString("encodedPrompt") ?: ""
+                val seedPrompt = try {
+                    String(Base64.decode(encodedPrompt, Base64.URL_SAFE or Base64.NO_WRAP))
+                } catch (_: Exception) { "" }
+                ChatDetailScreen(
+                    conversationId = "new",
+                    seedPrompt = seedPrompt,
+                    onBack = { navController.navigateUp() }
+                )
             }
 
             // ── In-app WebView browser ────────────────────────────────────────

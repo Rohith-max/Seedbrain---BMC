@@ -13,6 +13,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +27,9 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showSignOutDialog by remember { mutableStateOf(false) }
+    var showSensitiveDocTypePicker by remember { mutableStateOf(false) }
 
+    // ── Sign-out dialog ────────────────────────────────────────────────────────
     if (showSignOutDialog) {
         AlertDialog(
             onDismissRequest = { showSignOutDialog = false },
@@ -43,10 +48,60 @@ fun SettingsScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Settings") })
+    // ── Biometric error snackbar ───────────────────────────────────────────────
+    uiState.biometricError?.let { msg ->
+        AlertDialog(
+            onDismissRequest = { viewModel.clearBiometricError() },
+            title = { Text("Biometric Unavailable") },
+            text = { Text(msg) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.clearBiometricError() }) { Text("OK") }
+            }
+        )
+    }
+
+    // ── Sensitive doc type picker ─────────────────────────────────────────────
+    if (showSensitiveDocTypePicker && uiState.availableDocTypes.isNotEmpty()) {
+        val selected = remember(uiState.sensitiveDocTypes) {
+            mutableStateOf(uiState.sensitiveDocTypes.toMutableSet())
         }
+        AlertDialog(
+            onDismissRequest = { showSensitiveDocTypePicker = false },
+            title = { Text("Select Sensitive Document Types") },
+            text = {
+                Column {
+                    uiState.availableDocTypes.forEach { type ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Checkbox(
+                                checked = type in selected.value,
+                                onCheckedChange = { checked ->
+                                    val set = selected.value.toMutableSet()
+                                    if (checked) set += type else set -= type
+                                    selected.value = set
+                                }
+                            )
+                            Text(type, modifier = Modifier.padding(start = 8.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.setSensitiveDocTypes(selected.value)
+                    showSensitiveDocTypePicker = false
+                }) { Text("Save") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSensitiveDocTypePicker = false }) { Text("Cancel") }
+            }
+        )
+    }
+
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Settings") }) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -54,7 +109,7 @@ fun SettingsScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Profile section
+            // ── Profile card ──────────────────────────────────────────────────
             Surface(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 shape = MaterialTheme.shapes.large,
@@ -86,10 +141,22 @@ fun SettingsScreen(
                         Text(uiState.userEmail.ifBlank { "Demo Mode" },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
+                        if (uiState.lastSyncTime > 0L) {
+                            Text(
+                                "Last synced: ${formatRelativeTime(uiState.lastSyncTime)}",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
+                            )
+                        } else {
+                            Text("Never synced",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f))
+                        }
                     }
                 }
             }
 
+            // ── Family ────────────────────────────────────────────────────────
             SettingsSection(title = "Family") {
                 SettingsItem(
                     icon = Icons.Default.Group,
@@ -105,12 +172,21 @@ fun SettingsScreen(
                 )
             }
 
+            // ── Appearance ────────────────────────────────────────────────────
             SettingsSection(title = "Appearance") {
-                SettingsSwitchItem(
+                // Three-way theme selector (Req 19.2)
+                SettingsItem(
                     icon = Icons.Default.DarkMode,
                     title = "Dark Mode",
-                    checked = uiState.isDarkTheme,
-                    onCheckedChange = { viewModel.setDarkTheme(it) }
+                    subtitle = uiState.themeMode,
+                    onClick = {
+                        val next = when (uiState.themeMode) {
+                            "System Default" -> "Light"
+                            "Light" -> "Dark"
+                            else -> "System Default"
+                        }
+                        viewModel.setThemeMode(next)
+                    }
                 )
                 SettingsSwitchItem(
                     icon = Icons.Default.Notifications,
@@ -120,26 +196,44 @@ fun SettingsScreen(
                 )
             }
 
+            // ── Security ──────────────────────────────────────────────────────
             SettingsSection(title = "Security") {
+                // App Lock — Biometric (Req 1.1, 1.7)
                 SettingsSwitchItem(
                     icon = Icons.Default.Fingerprint,
-                    title = "Biometric Lock",
-                    subtitle = "Use fingerprint or face to unlock",
+                    title = "App Lock – Biometric",
+                    subtitle = if (uiState.biometricEnabled) uiState.biometricSubtitle else null,
                     checked = uiState.biometricEnabled,
-                    onCheckedChange = { viewModel.setBiometricEnabled(it) }
+                    onCheckedChange = { viewModel.confirmBiometricEnabled(it) }
                 )
-                SettingsItem(
+                // Sensitive document gate (Req 2.1, 2.2)
+                SettingsSwitchItem(
                     icon = Icons.Default.Lock,
-                    title = "Change PIN",
-                    onClick = { /* Navigate to PIN screen */ }
+                    title = "Require Biometric to View Sensitive Documents",
+                    subtitle = if (uiState.sensitiveDocBiometricEnabled)
+                        "${uiState.sensitiveDocTypes.size} type(s) protected" else null,
+                    checked = uiState.sensitiveDocBiometricEnabled,
+                    onCheckedChange = { viewModel.setSensitiveDocBiometricEnabled(it) }
                 )
+                if (uiState.sensitiveDocBiometricEnabled && uiState.availableDocTypes.isNotEmpty()) {
+                    SettingsItem(
+                        icon = Icons.Default.Shield,
+                        title = "Protected Document Types",
+                        subtitle = uiState.sensitiveDocTypes
+                            .takeIf { it.isNotEmpty() }
+                            ?.joinToString(", ")
+                            ?: "None selected",
+                        onClick = { showSensitiveDocTypePicker = true }
+                    )
+                }
             }
 
+            // ── Data ──────────────────────────────────────────────────────────
             SettingsSection(title = "Data") {
                 SettingsSwitchItem(
                     icon = Icons.Default.PlayArrow,
                     title = "Demo Mode",
-                    subtitle = if (uiState.isDemoMode) "Using sample data" else "Use real data",
+                    subtitle = if (uiState.isDemoMode) "Using sample data" else "Using real data",
                     checked = uiState.isDemoMode,
                     onCheckedChange = { viewModel.setDemoMode(it) }
                 )
@@ -151,6 +245,7 @@ fun SettingsScreen(
                 )
             }
 
+            // ── Account ───────────────────────────────────────────────────────
             SettingsSection(title = "Account") {
                 SettingsItem(
                     icon = Icons.Default.Logout,
@@ -160,18 +255,19 @@ fun SettingsScreen(
                 )
             }
 
-            // Version
             Box(
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("NIDHI v1.0.0 – Your Family's Financial Guardian",
+                Text("NIDHI v1.1.0 – Your Family's Financial Guardian",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline)
             }
         }
     }
 }
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
 
 @Composable
 private fun SettingsSection(
@@ -208,15 +304,17 @@ private fun SettingsItem(
         },
         supportingContent = subtitle?.let { { Text(it) } },
         leadingContent = {
-            Icon(icon, null,
+            Icon(icon, contentDescription = title,
                 tint = if (isDestructive) MaterialTheme.colorScheme.error
                 else MaterialTheme.colorScheme.primary)
         },
         trailingContent = {
-            Icon(Icons.Default.ChevronRight, null,
+            Icon(Icons.Default.ChevronRight, contentDescription = null,
                 tint = MaterialTheme.colorScheme.outline)
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .sizeIn(minHeight = 48.dp)
     )
 }
 
@@ -232,11 +330,27 @@ private fun SettingsSwitchItem(
         headlineContent = { Text(title) },
         supportingContent = subtitle?.let { { Text(it) } },
         leadingContent = {
-            Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, contentDescription = title, tint = MaterialTheme.colorScheme.primary)
         },
         trailingContent = {
-            Switch(checked = checked, onCheckedChange = onCheckedChange)
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            )
         },
         modifier = Modifier.fillMaxWidth()
     )
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+private fun formatRelativeTime(epochMs: Long): String {
+    val diffMs = System.currentTimeMillis() - epochMs
+    return when {
+        diffMs < 60_000L -> "just now"
+        diffMs < 3_600_000L -> "${TimeUnit.MILLISECONDS.toMinutes(diffMs)} min ago"
+        diffMs < 86_400_000L -> "${TimeUnit.MILLISECONDS.toHours(diffMs)} hours ago"
+        else -> SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(epochMs))
+    }
 }

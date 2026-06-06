@@ -30,4 +30,8 @@ interface AlertDao {
 
     @Query("DELETE FROM alerts WHERE userId = :userId AND triggerTime < :cutoff")
     suspend fun deleteOldAlerts(userId: String, cutoff: Long)
+
+    /** Returns all alerts for a user as a plain list (used by sync push). */
+    @Query("SELECT * FROM alerts WHERE userId = :userId ORDER BY triggerTime ASC")
+    suspend fun getAlertsDirect(userId: String): List<AlertEntity>
 }

@@ -27,6 +27,7 @@ fun BenefitDetailScreen(
     benefitId: String,
     onBack: () -> Unit,
     onOpenUrl: (url: String, title: String) -> Unit = { _, _ -> },
+    onAskAi: (prompt: String) -> Unit = {},   // Req 10.1 — navigates to AI chat with pre-filled prompt
     viewModel: BenefitsViewModel = koinViewModel()
 ) {
     val allBenefits by viewModel.uiState.collectAsState()
@@ -147,6 +148,19 @@ fun BenefitDetailScreen(
                             }
                         }
                     }
+                }
+
+                // Ask AI button (Req 10.1)
+                FilledTonalButton(
+                    onClick = {
+                        val prompt = "Explain my eligibility for ${b.name} based on my profile and documents."
+                        onAskAi(prompt)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.AutoAwesome, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Ask AI about eligibility")
                 }
 
                 // Official website button — opens in-app WebView

@@ -21,4 +21,8 @@ interface ConversationDao {
 
     @Query("DELETE FROM conversations WHERE userId = :userId")
     suspend fun clearAll(userId: String)
+
+    /** Returns all conversations for a user as a plain list (used by sync push). */
+    @Query("SELECT * FROM conversations WHERE userId = :userId ORDER BY updatedAt DESC")
+    suspend fun getConversationsDirect(userId: String): List<ConversationEntity>
 }
