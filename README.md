@@ -197,7 +197,7 @@ This locks every document to its owning user. Publish these rules from the Fireb
 
 ### local.properties
 
-Create or edit `BMC APP/local.properties` (this file is gitignored and must never be committed):
+Create or edit `BMC APP/local.properties`(In place of SIMULATED Add your openrouter key and any llm model of your choice):
 
 ```properties
 # Android SDK path — set automatically by Android Studio
@@ -206,8 +206,8 @@ sdk.dir=/path/to/your/Android/sdk
 # LLM API configuration
 # Leave LLM_API_KEY as "SIMULATED" to use the built-in offline engine (no API calls made)
 LLM_API_KEY=SIMULATED
-LLM_BASE_URL=https://api.openai.com/v1/
-LLM_MODEL=gpt-4o-mini
+LLM_BASE_URL=https://openrouter.ai/api/v1/
+LLM_MODEL=google/gemini-2.0-flash-001
 ```
 
 | Key | Required | Description |
