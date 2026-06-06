@@ -156,6 +156,41 @@ Responses are grounded in household data.
 
 ---
 
+## Local Setup
+
+### Prerequisites
+
+* Android Studio Hedgehog or later
+* JDK 11+
+* A Firebase project with Firestore, Authentication, and Messaging enabled
+* `google-services.json` placed at `BMC APP/app/google-services.json`
+
+### local.properties
+
+Create or edit `BMC APP/local.properties` (this file is gitignored and must never be committed):
+
+```properties
+# Android SDK path — set automatically by Android Studio
+sdk.dir=/path/to/your/Android/sdk
+
+# LLM API configuration
+# Leave LLM_API_KEY as "SIMULATED" to use the built-in offline engine (no API calls made)
+LLM_API_KEY=SIMULATED
+LLM_BASE_URL=https://api.openai.com/v1/
+LLM_MODEL=gpt-4o-mini
+```
+
+| Key | Required | Description |
+|---|---|---|
+| `sdk.dir` | Yes | Path to your Android SDK. Set automatically by Android Studio. |
+| `LLM_API_KEY` | No | OpenAI-compatible API key. Defaults to `SIMULATED` — the app will use the built-in `SimulatedLlmEngine` with no outbound calls. |
+| `LLM_BASE_URL` | No | Base URL for the LLM API. Defaults to `https://api.openai.com/v1/`. Change this to point to any OpenAI-compatible endpoint (e.g. Azure OpenAI, local Ollama). |
+| `LLM_MODEL` | No | Model identifier sent in API requests. Defaults to `gpt-4o-mini`. |
+
+> **Note:** When `LLM_API_KEY` is `SIMULATED` (or not set), `USE_SIMULATED_LLM` is automatically set to `true` at build time and the app never makes real LLM network calls.
+
+---
+
 ## Demo Experience
 
 The platform includes realistic Indian household simulations.
