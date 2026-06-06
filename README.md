@@ -162,8 +162,38 @@ Responses are grounded in household data.
 
 * Android Studio Hedgehog or later
 * JDK 11+
-* A Firebase project with Firestore, Authentication, and Messaging enabled
-* `google-services.json` placed at `BMC APP/app/google-services.json`
+
+### Firebase Setup
+
+The committed `google-services.json` contains **placeholder values** and will not connect to any real Firebase project. The app will still build and run using local Room storage and the simulated LLM engine, but cloud sync, authentication, and push notifications will not work without real credentials.
+
+To use your own Firebase project:
+
+1. Go to the [Firebase Console](https://console.firebase.google.com/) and create a new project (or open an existing one).
+2. Add an Android app with package name `com.nidhi.app`.
+3. Enable the following services in your project:
+   - **Authentication** — enable Google Sign-In and Email/Password providers
+   - **Cloud Firestore** — create a database (start in test mode or configure security rules)
+   - **Cloud Messaging** — no extra setup needed, enabled by default
+4. Download the `google-services.json` file from **Project Settings → Your apps**.
+5. Replace `BMC APP/app/google-services.json` with the downloaded file.
+
+> **Note:** `google-services.json` is listed as a reminder in the project `.gitignore` comment. Do **not** commit your real `google-services.json` to a public repository — it contains your Firebase API key and project identifiers.
+
+#### Firestore Security Rules (recommended starter)
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+This locks every document to its owning user. Publish these rules from the Firebase Console under **Firestore → Rules** before going to production.
 
 ### local.properties
 
