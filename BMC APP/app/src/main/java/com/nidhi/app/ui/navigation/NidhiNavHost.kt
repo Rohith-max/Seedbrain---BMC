@@ -54,11 +54,13 @@ fun NidhiNavHost(
     val isBiometricEnabled by userPreferences.isBiometricEnabled.collectAsState(initial = false)
     var biometricUnlocked by remember { mutableStateOf(false) }
 
-    // Show biometric lock if enabled and not yet unlocked this session
+    // Show biometric lock if enabled and not yet unlocked this session.
+    // onSkip is only called when the device has no lock mechanism whatsoever —
+    // in that case we cannot enforce biometric and allow through.
     if (isBiometricEnabled && !biometricUnlocked) {
         BiometricLockScreen(
             onUnlocked = { biometricUnlocked = true },
-            onSkip = { biometricUnlocked = true }
+            onSkip = { biometricUnlocked = true } // only reached when device has no lock at all
         )
         return
     }
