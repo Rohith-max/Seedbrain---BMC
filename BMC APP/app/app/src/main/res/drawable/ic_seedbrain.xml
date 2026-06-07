@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SeedBrain standalone icon drawable
+    Use in ImageView, splash screens, about page, etc.
+    24x24dp viewbox (scalable)
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+
+    <!-- Background circle (teal) -->
+    <path
+        android:fillColor="#006D77"
+        android:pathData="M48,48 m-48,0 a48,48 0 1,0 96,0 a48,48 0 1,0 -96,0" />
+
+    <!-- Inner glow ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#1AFFFFFF"
+        android:strokeWidth="10"
+        android:pathData="M48,48 m-34,0 a34,34 0 1,0 68,0 a34,34 0 1,0 -68,0" />
+
+    <!-- LEFT brain hemisphere -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M48,46
+            C48,46 44,44 40,44
+            C34,44 28,47 26,52
+            C23,57 23,63 25,67
+            C27,71 31,74 36,74
+            C38,74 40,73 42,72
+            C44,71 46,69 48,68
+            Z" />
+
+    <!-- LEFT hemisphere grooves -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#B3006D77"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M30,54 Q32,60 30,65" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#B3006D77"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M36,50 Q34,57 36,63" />
+
+    <!-- RIGHT brain hemisphere -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="
+            M48,46
+            C48,46 52,44 56,44
+            C62,44 68,47 70,52
+            C73,57 73,63 71,67
+            C69,71 65,74 60,74
+            C58,74 56,73 54,72
+            C52,71 50,69 48,68
+            Z" />
+
+    <!-- RIGHT hemisphere grooves -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#B3006D77"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M66,54 Q64,60 66,65" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#B3006D77"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M60,50 Q62,57 60,63" />
+
+    <!-- Brain center divide -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#66006D77"
+        android:strokeWidth="1.2"
+        android:pathData="M48,46 L48,68" />
+
+    <!-- Brain stem -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M44,72 Q48,78 52,72 L52,74 Q48,80 44,74 Z" />
+
+    <!-- SPROUT STEM (gold) -->
+    <path
+        android:fillColor="#E9C46A"
+        android:strokeColor="#E9C46A"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M48,46 Q47,38 48,30" />
+
+    <!-- LEFT leaf (gold) -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="
+            M48,38
+            Q40,33 36,37
+            Q38,43 48,41
+            Z" />
+
+    <!-- RIGHT leaf (gold) -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="
+            M48,34
+            Q56,29 60,33
+            Q58,39 48,37
+            Z" />
+
+    <!-- Seed bud at top -->
+    <path
+        android:fillColor="#E9C46A"
+        android:pathData="M48,30 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0" />
+
+    <!-- Gold sparkle dots -->
+    <path
+        android:fillColor="#CCE9C46A"
+        android:pathData="M26,34 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="#CCE9C46A"
+        android:pathData="M70,32 m-2,0 a2,2 0 1,0 4,0 a2,2 0 1,0 -4,0" />
+    <path
+        android:fillColor="#80E9C46A"
+        android:pathData="M72,70 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+    <path
+        android:fillColor="#80E9C46A"
+        android:pathData="M24,70 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+
+</vector>
