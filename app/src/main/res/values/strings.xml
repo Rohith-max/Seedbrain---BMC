@@ -70,4 +70,7 @@
     <string name="error_network">No internet connection.</string>
     <string name="error_ocr">Could not extract text from the document.</string>
     <string name="error_ai">AI service unavailable. Please try later.</string>
+
+    <!-- Widget -->
+    <string name="widget_description">NIDHI quick-access widget — tap to open your family vault</string>
 </resources>

@@ -27,6 +27,11 @@ object NavRoutes {
     const val CALENDAR = "calendar"
     const val DEMO_MODE = "demo"
     const val WEB_VIEW = "webview/{encodedUrl}/{title}"
+    const val GOVT_NEWS = "govt_news"
+    const val EMERGENCY_VAULT = "emergency_vault"
+    const val LIFE_EVENT = "life_event"
+    const val FAMILY_TIMELINE = "family_timeline"
+    const val WEEKLY_GUARDIAN = "weekly_guardian"
 
     // Helpers
     fun documentDetail(documentId: String) = "document/$documentId"

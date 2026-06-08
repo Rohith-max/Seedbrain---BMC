@@ -96,6 +96,19 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- NIDHI Home Screen Widget -->
+        <receiver
+            android:name=".widget.NidhiWidget"
+            android:exported="true"
+            android:label="NIDHI Widget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
     </application>
 
 </manifest>

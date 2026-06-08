@@ -11,99 +11,99 @@ import java.io.IOException
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "nidhi_prefs")
 
-class UserPreferences(
-    private val context: Context
-) {
+class UserPreferences(private val context: Context) {
 
     private object Keys {
-        val ONBOARDING_COMPLETE = booleanPreferencesKey("onboarding_complete")
-        val DARK_THEME = booleanPreferencesKey("dark_theme")
-        val LANGUAGE = stringPreferencesKey("language")
-        val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
-        val PIN_HASH = stringPreferencesKey("pin_hash")
-        val DEMO_MODE = booleanPreferencesKey("demo_mode")
-        val CURRENT_USER_ID = stringPreferencesKey("current_user_id")
-        val FCM_TOKEN = stringPreferencesKey("fcm_token")
-        val LAST_SYNC = longPreferencesKey("last_sync")
+        val ONBOARDING_COMPLETE  = booleanPreferencesKey("onboarding_complete")
+        val DARK_THEME           = booleanPreferencesKey("dark_theme")
+        val APP_THEME            = stringPreferencesKey("app_theme")        // "teal"|"saffron"|"forest"|"midnight"|"coral"
+        val LANGUAGE             = stringPreferencesKey("language")          // "en"|"hi"|"ta"|"te"|"bn"|"mr"
+        val FONT_SIZE            = stringPreferencesKey("font_size")         // "small"|"medium"|"large"
+        val BIOMETRIC_ENABLED    = booleanPreferencesKey("biometric_enabled")
+        val NOTIFICATIONS_ENABLED= booleanPreferencesKey("notifications_enabled")
+        val PIN_HASH             = stringPreferencesKey("pin_hash")
+        val DEMO_MODE            = booleanPreferencesKey("demo_mode")
+        val CURRENT_USER_ID      = stringPreferencesKey("current_user_id")
+        val FCM_TOKEN            = stringPreferencesKey("fcm_token")
+        val LAST_SYNC            = longPreferencesKey("last_sync")
+        val WHATSAPP_PHONE       = stringPreferencesKey("whatsapp_phone")
+        val WIDGET_ENABLED       = booleanPreferencesKey("widget_enabled")
     }
 
-    private val dataStore = context.dataStore
+    private val store = context.dataStore
 
-    val isOnboardingComplete: Flow<Boolean> = dataStore.data
+    val isOnboardingComplete: Flow<Boolean> = store.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[Keys.ONBOARDING_COMPLETE] ?: false }
 
-    val isDarkTheme: Flow<Boolean> = dataStore.data
+    val isDarkTheme: Flow<Boolean> = store.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[Keys.DARK_THEME] ?: false }
 
-    val language: Flow<String> = dataStore.data
+    val appTheme: Flow<String> = store.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[Keys.APP_THEME] ?: "teal" }
+
+    val language: Flow<String> = store.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[Keys.LANGUAGE] ?: "en" }
 
-    val isBiometricEnabled: Flow<Boolean> = dataStore.data
+    val fontSize: Flow<String> = store.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[Keys.FONT_SIZE] ?: "medium" }
+
+    val isBiometricEnabled: Flow<Boolean> = store.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[Keys.BIOMETRIC_ENABLED] ?: false }
 
-    val pinHash: Flow<String?> = dataStore.data
+    val isNotificationsEnabled: Flow<Boolean> = store.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[Keys.NOTIFICATIONS_ENABLED] ?: true }
+
+    val pinHash: Flow<String?> = store.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[Keys.PIN_HASH] }
 
-    val isDemoMode: Flow<Boolean> = dataStore.data
+    val isDemoMode: Flow<Boolean> = store.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[Keys.DEMO_MODE] ?: false }
 
-    val currentUserId: Flow<String?> = dataStore.data
+    val currentUserId: Flow<String?> = store.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[Keys.CURRENT_USER_ID] }
 
-    val lastSyncTime: Flow<Long> = dataStore.data
+    val lastSyncTime: Flow<Long> = store.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
         .map { it[Keys.LAST_SYNC] ?: 0L }
 
-    suspend fun setOnboardingComplete(complete: Boolean) {
-        dataStore.edit { it[Keys.ONBOARDING_COMPLETE] = complete }
-    }
+    val whatsappPhone: Flow<String> = store.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[Keys.WHATSAPP_PHONE] ?: "" }
 
-    suspend fun setDarkTheme(dark: Boolean) {
-        dataStore.edit { it[Keys.DARK_THEME] = dark }
-    }
+    val isWidgetEnabled: Flow<Boolean> = store.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[Keys.WIDGET_ENABLED] ?: true }
 
-    suspend fun setLanguage(lang: String) {
-        dataStore.edit { it[Keys.LANGUAGE] = lang }
-    }
+    // ── Writers ───────────────────────────────────────────────────────────────
 
-    suspend fun setBiometricEnabled(enabled: Boolean) {
-        dataStore.edit { it[Keys.BIOMETRIC_ENABLED] = enabled }
-    }
+    suspend fun setOnboardingComplete(v: Boolean)    = store.edit { it[Keys.ONBOARDING_COMPLETE] = v }
+    suspend fun setDarkTheme(v: Boolean)             = store.edit { it[Keys.DARK_THEME] = v }
+    suspend fun setAppTheme(v: String)               = store.edit { it[Keys.APP_THEME] = v }
+    suspend fun setLanguage(v: String)               = store.edit { it[Keys.LANGUAGE] = v }
+    suspend fun setFontSize(v: String)               = store.edit { it[Keys.FONT_SIZE] = v }
+    suspend fun setBiometricEnabled(v: Boolean)      = store.edit { it[Keys.BIOMETRIC_ENABLED] = v }
+    suspend fun setNotificationsEnabled(v: Boolean)  = store.edit { it[Keys.NOTIFICATIONS_ENABLED] = v }
+    suspend fun setDemoMode(v: Boolean)              = store.edit { it[Keys.DEMO_MODE] = v }
+    suspend fun setWhatsappPhone(v: String)          = store.edit { it[Keys.WHATSAPP_PHONE] = v }
+    suspend fun setWidgetEnabled(v: Boolean)         = store.edit { it[Keys.WIDGET_ENABLED] = v }
 
-    suspend fun setPinHash(hash: String?) {
-        dataStore.edit {
-            if (hash == null) it.remove(Keys.PIN_HASH)
-            else it[Keys.PIN_HASH] = hash
-        }
+    suspend fun setPinHash(hash: String?) = store.edit {
+        if (hash == null) it.remove(Keys.PIN_HASH) else it[Keys.PIN_HASH] = hash
     }
-
-    suspend fun setDemoMode(demo: Boolean) {
-        dataStore.edit { it[Keys.DEMO_MODE] = demo }
+    suspend fun setCurrentUserId(uid: String?) = store.edit {
+        if (uid == null) it.remove(Keys.CURRENT_USER_ID) else it[Keys.CURRENT_USER_ID] = uid
     }
-
-    suspend fun setCurrentUserId(uid: String?) {
-        dataStore.edit {
-            if (uid == null) it.remove(Keys.CURRENT_USER_ID)
-            else it[Keys.CURRENT_USER_ID] = uid
-        }
-    }
-
-    suspend fun setFcmToken(token: String) {
-        dataStore.edit { it[Keys.FCM_TOKEN] = token }
-    }
-
-    suspend fun setLastSyncTime(time: Long) {
-        dataStore.edit { it[Keys.LAST_SYNC] = time }
-    }
-
-    suspend fun clearAll() {
-        dataStore.edit { it.clear() }
-    }
+    suspend fun setFcmToken(token: String)           = store.edit { it[Keys.FCM_TOKEN] = token }
+    suspend fun setLastSyncTime(time: Long)          = store.edit { it[Keys.LAST_SYNC] = time }
+    suspend fun clearAll()                           = store.edit { it.clear() }
 }

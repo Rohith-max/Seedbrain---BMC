@@ -7,11 +7,8 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.nidhi.app.BuildConfig
 import com.nidhi.app.data.local.AppDatabase
 import com.nidhi.app.data.local.prefs.UserPreferences
-import com.nidhi.app.data.remote.ClerkAuthService
-import com.nidhi.app.data.remote.GroqServiceFactory
 import com.nidhi.app.data.remote.LlmApiService
 import com.nidhi.app.data.remote.SimulatedLlmEngine
-import com.nidhi.app.data.remote.SupabaseIntegration
 import com.nidhi.app.data.remote.SupabaseRepository
 import com.nidhi.app.data.repository.*
 import com.nidhi.app.domain.repository.*
@@ -73,25 +70,6 @@ val appModule = module {
     }
 
     single { get<Retrofit>().create(LlmApiService::class.java) }
-
-    // ── Groq API Service (for real LLM calls when not simulating) ─────────────
-    // Only instantiate if real LLM is enabled
-    single {
-        if (!BuildConfig.USE_SIMULATED_LLM) {
-            GroqServiceFactory.create()
-        } else {
-            get<Retrofit>().create(LlmApiService::class.java)
-        }
-    }
-
-    // ── Supabase Integration ──────────────────────────────────────────────────
-    single {
-        SupabaseIntegration.initialize()
-        SupabaseIntegration
-    }
-
-    // ── Clerk Auth Service (reference for mobile OAuth) ──────────────────────
-    single { ClerkAuthService }
 
     // ── Firebase ──────────────────────────────────────────────────────────────
     single { FirebaseAuth.getInstance() }

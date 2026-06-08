@@ -45,6 +45,11 @@ fun HomeScreen(
     onNavigateToBenefits: () -> Unit,
     onNavigateToAlerts: () -> Unit,
     onNavigateToEmergency: () -> Unit,
+    onNavigateToNews: () -> Unit = {},
+    onNavigateToVault: () -> Unit = {},
+    onNavigateToLifeEvent: () -> Unit = {},
+    onNavigateToTimeline: () -> Unit = {},
+    onNavigateToGuardian: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -169,6 +174,13 @@ fun HomeScreen(
                                 tint = MaterialTheme.colorScheme.error
                             )
                         }
+                        item {
+                            QuickActionChip(
+                                icon = Icons.Default.Newspaper,
+                                label = "News",
+                                onClick = onNavigateToNews
+                            )
+                        }
                     }
                 }
 
@@ -199,6 +211,58 @@ fun HomeScreen(
                     }
                     items(uiState.unreadAlerts) { alert ->
                         AlertCard(alert = alert)
+                    }
+                }
+
+                item { Spacer(Modifier.height(8.dp)) }
+
+                // ── Power Features Row ────────────────────────────────────────
+                item {
+                    SectionHeader(title = "Family Tools")
+                    Spacer(Modifier.height(8.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            FeatureCard(
+                                icon = Icons.Default.Security,
+                                title = "Emergency Vault",
+                                subtitle = "Insurance, nominees, medical info",
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                onClick = onNavigateToVault,
+                                modifier = Modifier.weight(1f)
+                            )
+                            FeatureCard(
+                                icon = Icons.Default.Timeline,
+                                title = "Family Timeline",
+                                subtitle = "Your financial journey",
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                onClick = onNavigateToTimeline,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            FeatureCard(
+                                icon = Icons.Default.Event,
+                                title = "Life Events",
+                                subtitle = "Marriage, baby, house checklists",
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                onClick = onNavigateToLifeEvent,
+                                modifier = Modifier.weight(1f)
+                            )
+                            FeatureCard(
+                                icon = Icons.Default.Shield,
+                                title = "Weekly Guardian",
+                                subtitle = "AI family status report",
+                                color = MaterialTheme.colorScheme.tertiaryContainer,
+                                onClick = onNavigateToGuardian,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
 
@@ -390,5 +454,29 @@ private fun getGreeting(): String {
         in 12..16 -> "afternoon"
         in 17..20 -> "evening"
         else -> "night"
+    }
+}
+
+@Composable
+private fun FeatureCard(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    color: androidx.compose.ui.graphics.Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(onClick = onClick, modifier = modifier) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Surface(Modifier.size(36.dp), RoundedCornerShape(8.dp), color = color) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, null, Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+            Text(subtitle, style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(0.6f), maxLines = 2)
+        }
     }
 }

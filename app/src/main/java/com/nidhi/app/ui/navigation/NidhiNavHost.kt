@@ -37,6 +37,11 @@ import com.nidhi.app.feature.emergency.EmergencyScreen
 import com.nidhi.app.feature.home.HomeScreen
 import com.nidhi.app.feature.notifications.AlertsScreen
 import com.nidhi.app.feature.settings.SettingsScreen
+import com.nidhi.app.feature.news.GovtNewsScreen
+import com.nidhi.app.feature.vault.EmergencyVaultScreen
+import com.nidhi.app.feature.lifeevent.LifeEventScreen
+import com.nidhi.app.feature.timeline.FamilyTimelineScreen
+import com.nidhi.app.feature.guardian.WeeklyGuardianScreen
 import com.nidhi.app.feature.webview.WebViewScreen
 import org.koin.compose.koinInject
 
@@ -149,10 +154,15 @@ fun NidhiNavHost(
             // ── Main ──────────────────────────────────────────────────────────
             composable(NavRoutes.HOME) {
                 HomeScreen(
-                    onNavigateToDocuments = { navController.navigate(NavRoutes.DOCUMENTS) },
-                    onNavigateToBenefits = { navController.navigate(NavRoutes.BENEFITS) },
-                    onNavigateToAlerts = { navController.navigate(NavRoutes.ALERTS) },
-                    onNavigateToEmergency = { navController.navigate(NavRoutes.EMERGENCY) }
+                    onNavigateToDocuments  = { navController.navigate(NavRoutes.DOCUMENTS) },
+                    onNavigateToBenefits   = { navController.navigate(NavRoutes.BENEFITS) },
+                    onNavigateToAlerts     = { navController.navigate(NavRoutes.ALERTS) },
+                    onNavigateToEmergency  = { navController.navigate(NavRoutes.EMERGENCY) },
+                    onNavigateToNews       = { navController.navigate(NavRoutes.GOVT_NEWS) },
+                    onNavigateToVault      = { navController.navigate(NavRoutes.EMERGENCY_VAULT) },
+                    onNavigateToLifeEvent  = { navController.navigate(NavRoutes.LIFE_EVENT) },
+                    onNavigateToTimeline   = { navController.navigate(NavRoutes.FAMILY_TIMELINE) },
+                    onNavigateToGuardian   = { navController.navigate(NavRoutes.WEEKLY_GUARDIAN) }
                 )
             }
             composable(NavRoutes.DOCUMENTS) {
@@ -232,6 +242,29 @@ fun NidhiNavHost(
             }
             composable(NavRoutes.FAMILY_MEMBERS) {
                 FamilyMembersScreen(onBack = { navController.navigateUp() })
+            }
+
+            composable(NavRoutes.EMERGENCY_VAULT) {
+                EmergencyVaultScreen(onBack = { navController.navigateUp() })
+            }
+            composable(NavRoutes.LIFE_EVENT) {
+                LifeEventScreen(onBack = { navController.navigateUp() })
+            }
+            composable(NavRoutes.FAMILY_TIMELINE) {
+                FamilyTimelineScreen(onBack = { navController.navigateUp() })
+            }
+            composable(NavRoutes.WEEKLY_GUARDIAN) {
+                WeeklyGuardianScreen(onBack = { navController.navigateUp() })
+            }
+
+            // ── Government News ───────────────────────────────────────────────
+            composable(NavRoutes.GOVT_NEWS) {
+                GovtNewsScreen(
+                    onBack = { navController.navigateUp() },
+                    onOpenUrl = { url, title ->
+                        navController.navigate(NavRoutes.webView(url, title))
+                    }
+                )
             }
 
             // ── In-app WebView browser ────────────────────────────────────────

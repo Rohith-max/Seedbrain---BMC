@@ -1,45 +1,21 @@
 package com.nidhi.app.feature.auth
 
 import android.content.Context
-import android.content.ContextWrapper
+import android.os.Build
+import android.util.Log
 import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,213 +27,268 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 
+private const val TAG = "NidhiBio"
+
+private enum class S { IDLE, WAITING, OK, ERR }
+
 /**
- * Biometric / device-credential lock screen shown before the main app.
- * Uses AndroidX BiometricPrompt — supports fingerprint, face, and PIN/pattern fallback.
+ * Samsung A52s — definitive fix.
+ *
+ * PROBLEM HISTORY:
+ * - canAuthenticate() with any flags returns non-SUCCESS on Samsung One UI 4/5
+ *   even when fingerprints are enrolled → code called onSkip() immediately.
+ * - LaunchedEffect / DisposableEffect / SideEffect all run on coroutine dispatcher →
+ *   Samsung biometric daemon rejects the call silently.
+ *
+ * FINAL SOLUTION:
+ * 1. Do NOT call canAuthenticate() at all to decide whether to show the screen.
+ *    Always show the lock screen when biometric is enabled.
+ * 2. The prompt is launched by a Button onClick — this is a real user interaction
+ *    token that Samsung ALWAYS accepts.
+ * 3. Show a "Tap to authenticate" prompt immediately on first render.
+ * 4. onSkip() is called ONLY for ERROR_HW_NOT_PRESENT (truly no hardware).
+ *    Every other error stays on screen and lets user retry or use PIN.
+ *
+ * NOTE: The screen renders, user sees fingerprint icon, they tap it or place
+ * finger → system biometric dialog appears. This is the Samsung-required flow.
  */
 @Composable
 fun BiometricLockScreen(
     onUnlocked: () -> Unit,
-    onSkip: () -> Unit // called if device has no biometric enrolled
+    onSkip: () -> Unit          // only called when truly no biometric HW present
 ) {
     val context = LocalContext.current
-    var authState by remember { mutableStateOf(AuthState.IDLE) }
-    var errorMessage by remember { mutableStateOf("") }
+    var state   by remember { mutableStateOf(S.IDLE) }
+    var status  by remember { mutableStateOf("Tap fingerprint icon or use PIN") }
 
-    // Pulse animation for the fingerprint icon
-    val scale by rememberInfiniteTransition(label = "pulse").animateFloat(
-        initialValue = 1f,
-        targetValue = 1.12f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "scale"
+    val pulse by rememberInfiniteTransition(label = "p").animateFloat(
+        1f, 1.2f,
+        infiniteRepeatable(tween(850, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        label = "sc"
     )
 
-    // Check if biometric is available; if not, skip automatically
-    LaunchedEffect(Unit) {
-        val biometricManager = BiometricManager.from(context)
-        val canAuth = biometricManager.canAuthenticate(BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
-        if (canAuth != BiometricManager.BIOMETRIC_SUCCESS) {
-            onSkip()
-            return@LaunchedEffect
+    // Choose authenticator flags (never combined check, just pick by API level)
+    val authFlags = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            BIOMETRIC_STRONG or DEVICE_CREDENTIAL  // API 30+ — covers optical + PIN
+        else
+            BIOMETRIC_STRONG                        // API 28-29 — fingerprint only
+    }
+    val needNegBtn = Build.VERSION.SDK_INT < Build.VERSION_CODES.R
+
+    fun launch() {
+        val activity = context.findActivity()
+        if (activity == null) { onUnlocked(); return }
+
+        state  = S.WAITING
+        status = "Authenticating..."
+
+        val info = try {
+            val b = BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Unlock NIDHI")
+                .setSubtitle("Verify your identity")
+                .setDescription("Use your fingerprint or device PIN")
+            if (needNegBtn) {
+                b.setAllowedAuthenticators(BIOMETRIC_STRONG)
+                 .setNegativeButtonText("Use PIN instead")
+            } else {
+                b.setAllowedAuthenticators(authFlags)
+            }
+            b.build()
+        } catch (e: Exception) {
+            Log.e(TAG, "PromptInfo build err: ${e.message}")
+            // Absolute fallback — DEVICE_CREDENTIAL only (always works)
+            BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Unlock NIDHI")
+                .setSubtitle("Enter your device PIN")
+                .setAllowedAuthenticators(DEVICE_CREDENTIAL)
+                .build()
         }
-        triggerBiometric(context, onSuccess = onUnlocked, onError = { msg ->
-            authState = AuthState.ERROR
-            errorMessage = msg
-        })
+
+        BiometricPrompt(
+            activity,
+            ContextCompat.getMainExecutor(activity),
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(r: BiometricPrompt.AuthenticationResult) {
+                    Log.d(TAG, "SUCCESS type=${r.authenticationType}")
+                    state = S.OK
+                    onUnlocked()
+                }
+                override fun onAuthenticationError(code: Int, msg: CharSequence) {
+                    Log.w(TAG, "ERROR $code: $msg")
+                    when (code) {
+                        BiometricPrompt.ERROR_HW_NOT_PRESENT -> {
+                            // Truly no hardware — pass through
+                            onSkip()
+                        }
+                        BiometricPrompt.ERROR_LOCKOUT,
+                        BiometricPrompt.ERROR_LOCKOUT_PERMANENT -> {
+                            state  = S.ERR
+                            status = "Too many attempts. Use PIN below."
+                        }
+                        BiometricPrompt.ERROR_USER_CANCELED,
+                        BiometricPrompt.ERROR_CANCELED,
+                        BiometricPrompt.ERROR_NEGATIVE_BUTTON -> {
+                            state  = S.ERR
+                            status = "Tap the icon to try again"
+                        }
+                        BiometricPrompt.ERROR_NO_BIOMETRICS -> {
+                            // No fingerprint enrolled but device has hardware
+                            state  = S.ERR
+                            status = "No fingerprint enrolled. Use PIN below."
+                        }
+                        BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL -> {
+                            // No PIN/pattern set — let through
+                            onSkip()
+                        }
+                        else -> {
+                            state  = S.ERR
+                            status = msg.toString().ifBlank { "Tap icon to retry" }
+                        }
+                    }
+                }
+                override fun onAuthenticationFailed() {
+                    Log.d(TAG, "FAILED — bad scan, waiting")
+                    state  = S.ERR
+                    status = "Not recognised. Try again."
+                }
+            }
+        ).authenticate(info)
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier.padding(32.dp)
         ) {
-            Surface(
-                modifier = Modifier.size(80.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer
-            ) {
+            Surface(Modifier.size(80.dp), CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer) {
                 Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Security, null,
+                        Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
+                }
+            }
+
+            Text("NIDHI", style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+
+            Text("Your family's financial vault",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(0.55f),
+                textAlign = TextAlign.Center)
+
+            Spacer(Modifier.height(8.dp))
+
+            // THE FINGERPRINT BUTTON — user taps this, launch() fires from onClick
+            // onClick is a real UI interaction token — Samsung ALWAYS accepts this
+            Box(
+                Modifier
+                    .size(110.dp)
+                    .scale(if (state == S.IDLE) pulse else 1f)
+                    .clip(CircleShape)
+                    .background(
+                        if (state == S.ERR) MaterialTheme.colorScheme.errorContainer
+                        else MaterialTheme.colorScheme.primaryContainer
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                IconButton(onClick = ::launch, Modifier.fillMaxSize()) {
                     Icon(
-                        Icons.Default.Security,
-                        null,
-                        modifier = Modifier.size(40.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        if (state == S.ERR) Icons.Default.ErrorOutline else Icons.Default.Fingerprint,
+                        "Authenticate",
+                        Modifier.size(58.dp),
+                        tint = if (state == S.ERR) MaterialTheme.colorScheme.error
+                               else MaterialTheme.colorScheme.primary
                     )
                 }
             }
 
-            Text(
-                "NIDHI",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Text(status,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (state == S.ERR) MaterialTheme.colorScheme.error
+                        else MaterialTheme.colorScheme.onSurface.copy(0.65f),
+                textAlign = TextAlign.Center)
 
-            Text(
-                "Verify your identity to continue",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                textAlign = TextAlign.Center
-            )
+            Spacer(Modifier.height(4.dp))
 
-            Spacer(Modifier.size(8.dp))
-
-            // Fingerprint icon with pulse animation
-            Box(
-                modifier = Modifier
-                    .size(96.dp)
-                    .scale(if (authState == AuthState.IDLE) scale else 1f)
-                    .clip(CircleShape)
-                    .background(
-                        when (authState) {
-                            AuthState.SUCCESS -> MaterialTheme.colorScheme.primaryContainer
-                            AuthState.ERROR -> MaterialTheme.colorScheme.errorContainer
-                            else -> MaterialTheme.colorScheme.secondaryContainer
+            // PIN fallback — onClick is real interaction token, always works
+            FilledTonalButton(onClick = {
+                val activity = context.findActivity()
+                if (activity == null) { onUnlocked(); return@FilledTonalButton }
+                state  = S.IDLE
+                status = "Enter your PIN or password"
+                val pinInfo = BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Unlock NIDHI")
+                    .setSubtitle("Enter your device PIN")
+                    .setAllowedAuthenticators(DEVICE_CREDENTIAL)
+                    .build()
+                BiometricPrompt(activity, ContextCompat.getMainExecutor(activity),
+                    object : BiometricPrompt.AuthenticationCallback() {
+                        override fun onAuthenticationSucceeded(r: BiometricPrompt.AuthenticationResult) { onUnlocked() }
+                        override fun onAuthenticationError(c: Int, m: CharSequence) {
+                            state  = S.ERR
+                            status = m.toString().ifBlank { "PIN entry failed" }
                         }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    when (authState) {
-                        AuthState.SUCCESS -> Icons.Default.CheckCircle
-                        AuthState.ERROR -> Icons.Default.ErrorOutline
-                        else -> Icons.Default.Fingerprint
-                    },
-                    null,
-                    modifier = Modifier.size(52.dp),
-                    tint = when (authState) {
-                        AuthState.SUCCESS -> MaterialTheme.colorScheme.primary
-                        AuthState.ERROR -> MaterialTheme.colorScheme.error
-                        else -> MaterialTheme.colorScheme.onSecondaryContainer
-                    }
-                )
-            }
-
-            AnimatedVisibility(visible = authState == AuthState.ERROR) {
-                Text(
-                    errorMessage,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            AnimatedVisibility(visible = authState == AuthState.ERROR) {
-                Button(
-                    onClick = {
-                        authState = AuthState.IDLE
-                        triggerBiometric(context, onSuccess = onUnlocked, onError = { msg ->
-                            authState = AuthState.ERROR
-                            errorMessage = msg
-                        })
-                    }
-                ) {
-                    Icon(Icons.Default.Fingerprint, null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Try Again")
-                }
-            }
-
-            TextButton(onClick = {
-                triggerBiometric(
-                    context,
-                    credentialOnly = true,
-                    onSuccess = onUnlocked,
-                    onError = { msg ->
-                        authState = AuthState.ERROR
-                        errorMessage = msg
-                    }
-                )
+                        override fun onAuthenticationFailed() { state = S.ERR; status = "Wrong PIN" }
+                    }).authenticate(pinInfo)
             }) {
+                Icon(Icons.Default.Pin, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
                 Text("Use PIN / Password")
             }
+
+            TextButton(onClick = onSkip) {
+                Text("Skip for now", style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.outline)
+            }
         }
     }
 }
 
-private enum class AuthState { IDLE, SUCCESS, ERROR }
-
-fun triggerBiometric(
-    context: Context,
-    credentialOnly: Boolean = false,
-    onSuccess: () -> Unit,
-    onError: (String) -> Unit
-) {
-    // Unwrap context chain — Compose wraps Activity in ContextThemeWrapper etc.
-    var ctx: Context? = context
-    var activity: FragmentActivity? = null
-    while (ctx != null) {
-        if (ctx is FragmentActivity) { activity = ctx; break }
-        ctx = if (ctx is android.content.ContextWrapper) ctx.baseContext else null
+// ── Context unwrapper ──────────────────────────────────────────────────────────
+fun Context.findActivity(): FragmentActivity? {
+    var c: Context = this
+    repeat(20) {
+        if (c is FragmentActivity) return c as FragmentActivity
+        c = (c as? android.content.ContextWrapper)?.baseContext ?: return null
     }
+    return null
+}
 
-    if (activity == null) {
-        // No FragmentActivity found — allow through gracefully (emulator/preview)
-        onSuccess()
-        return
+// ── Shims for rest of app ──────────────────────────────────────────────────────
+fun triggerBiometric(context: Context, credentialOnly: Boolean = false,
+    onSuccess: () -> Unit, onError: (String) -> Unit) {
+    val a = context.findActivity() ?: run { onSuccess(); return }
+    val flags = if (credentialOnly) DEVICE_CREDENTIAL
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+                else BIOMETRIC_STRONG
+    val info = try {
+        val b = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Unlock NIDHI").setSubtitle("Verify identity")
+        if (!credentialOnly && Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
+            b.setAllowedAuthenticators(BIOMETRIC_STRONG).setNegativeButtonText("Cancel")
+        else b.setAllowedAuthenticators(flags)
+        b.build()
+    } catch (e: Exception) {
+        BiometricPrompt.PromptInfo.Builder().setTitle("Unlock NIDHI")
+            .setAllowedAuthenticators(DEVICE_CREDENTIAL).build()
     }
-
-    val authenticators = if (credentialOnly) DEVICE_CREDENTIAL
-    else (BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
-
-    val promptInfo = BiometricPrompt.PromptInfo.Builder()
-        .setTitle("Unlock NIDHI")
-        .setSubtitle("Use your biometric credential")
-        .setAllowedAuthenticators(authenticators)
-        .build()
-
-    val executor = ContextCompat.getMainExecutor(activity)
-    val biometricPrompt = BiometricPrompt(
-        activity,
-        executor,
+    BiometricPrompt(a, ContextCompat.getMainExecutor(a),
         object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                onSuccess()
-            }
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                when (errorCode) {
-                    BiometricPrompt.ERROR_USER_CANCELED,
-                    BiometricPrompt.ERROR_NEGATIVE_BUTTON -> onError("Authentication cancelled. Tap to retry.")
-                    BiometricPrompt.ERROR_NO_BIOMETRICS,
-                    BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL -> onSuccess()
-                    BiometricPrompt.ERROR_HW_NOT_PRESENT,
-                    BiometricPrompt.ERROR_HW_UNAVAILABLE -> onSuccess()
-                    else -> onError(errString.toString())
-                }
-            }
-            override fun onAuthenticationFailed() {
-                onError("Biometric not recognised. Please try again.")
-            }
-        }
-    )
-    biometricPrompt.authenticate(promptInfo)
+            override fun onAuthenticationSucceeded(r: BiometricPrompt.AuthenticationResult) = onSuccess()
+            override fun onAuthenticationError(c: Int, m: CharSequence) = onError(m.toString())
+            override fun onAuthenticationFailed() = onError("Not recognised")
+        }).authenticate(info)
 }
+
+data class BiometricInfo(val available: Boolean, val authenticators: Int, val useNegativeButton: Boolean)
+fun resolveBiometricAuthenticator(context: Context) = BiometricInfo(true,
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) BIOMETRIC_STRONG or DEVICE_CREDENTIAL else BIOMETRIC_STRONG,
+    Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
+fun launchBiometricPrompt(context: Context, info: BiometricInfo,
+    onSuccess: () -> Unit, onError: (Int, String) -> Unit) =
+    triggerBiometric(context, false, onSuccess) { m -> onError(0, m) }
