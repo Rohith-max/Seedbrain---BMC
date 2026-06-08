@@ -1,2 +1,22 @@
 # Kiro IDE files — local spec/steering data, not part of the project source
 .kiro/
+
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Secret keys — NEVER commit
+secrets.properties
+app/google-services.json

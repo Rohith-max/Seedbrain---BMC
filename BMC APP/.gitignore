@@ -14,16 +14,6 @@
 .cxx
 local.properties
 
-# Firebase config — contains API keys, do not commit to public repos
-# app/google-services.json
-
-# Gradle build outputs
-**/build/
-**/.gradle/
-
-# IDE files
-**/.idea/
-**/*.iml
-
-# Local properties (SDK paths etc.)
-local.properties
+# Secret keys — NEVER commit
+secrets.properties
+app/google-services.json

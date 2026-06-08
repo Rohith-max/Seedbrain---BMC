@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network security config for NIDHI.
+    Allows cleartext traffic to government domains that may still use HTTP,
+    while enforcing HTTPS for all other connections.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Allow HTTP for Indian government portals that may not have HTTPS -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">uidai.gov.in</domain>
+        <domain includeSubdomains="true">incometax.gov.in</domain>
+        <domain includeSubdomains="true">pmayg.nic.in</domain>
+        <domain includeSubdomains="true">pmaymis.gov.in</domain>
+        <domain includeSubdomains="true">mera.pmjay.gov.in</domain>
+        <domain includeSubdomains="true">pmjay.gov.in</domain>
+        <domain includeSubdomains="true">pmkisan.gov.in</domain>
+        <domain includeSubdomains="true">epfindia.gov.in</domain>
+        <domain includeSubdomains="true">parivahan.gov.in</domain>
+        <domain includeSubdomains="true">passportindia.gov.in</domain>
+        <domain includeSubdomains="true">mudra.org.in</domain>
+        <domain includeSubdomains="true">india.gov.in</domain>
+        <domain includeSubdomains="true">gov.in</domain>
+        <domain includeSubdomains="true">nic.in</domain>
+    </domain-config>
+</network-security-config>
