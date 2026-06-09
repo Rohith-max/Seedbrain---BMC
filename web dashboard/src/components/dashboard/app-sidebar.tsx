@@ -22,16 +22,22 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/auth-store';
 
-const NAV = [
-  { href: '/dashboard',                   icon: Home,      label: 'Home' },
-  { href: '/dashboard/assistant',         icon: Bot,       label: 'AI Assistant' },
-  { href: '/dashboard/alerts',            icon: Bell,      label: 'Alerts',    badge: '3' },
-  { href: '/dashboard/benefits',          icon: Gift,      label: 'Benefits',  badge: '12' },
-  { href: '/dashboard/vault',             icon: Archive,   label: 'Documents' },
-  { href: '/dashboard/family',            icon: Users,     label: 'Family' },
-  { href: '/dashboard/knowledge-graph',   icon: Network,   label: 'Knowledge Graph' },
-  { href: '/dashboard/analytics',         icon: BarChart3, label: 'Analytics' },
-  { href: '/dashboard/government-portals', icon: Globe,    label: 'Gov Portals' },
+interface NavItem {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  badge?: string;
+}
+
+const NAV: NavItem[] = [
+  { href: '/dashboard', icon: Home, label: 'Home' },
+  { href: '/dashboard/assistant', icon: Bot, label: 'AI Assistant' },
+  { href: '/dashboard/alerts', icon: Bell, label: 'Alerts', badge: '3' },
+  { href: '/dashboard/benefits', icon: Gift, label: 'Benefits', badge: '12' },
+  { href: '/dashboard/vault', icon: Archive, label: 'Documents' },
+  { href: '/dashboard/family', icon: Users, label: 'Family' },
+  { href: '/dashboard/knowledge-graph', icon: Network, label: 'Knowledge Graph' },
+  { href: '/dashboard/analytics', icon: BarChart3, label: 'Analytics' },
 ];
 
 const GOLD_GRADIENT = 'linear-gradient(135deg, #D4AF37, #E8D080)';

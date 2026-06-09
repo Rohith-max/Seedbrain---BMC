@@ -20,6 +20,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +29,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import com.nidhi.app.domain.model.Alert
 import com.nidhi.app.domain.model.Document
 import com.nidhi.app.domain.model.FamilyHealthScore
+import com.nidhi.app.ui.components.AnimatedCounter
 import com.nidhi.app.ui.components.CardSkeleton
 import com.nidhi.app.ui.components.GlassCard
 import com.nidhi.app.ui.components.SectionHeader
@@ -126,6 +129,37 @@ fun HomeScreen(
                     }
                 }
 
+// ── No family members prompt (Req 16.7) ─────────────────────────
+                if (uiState.familyMemberCount == 0) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Group,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.tertiary
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        "Add family members to calculate your Family Health Score.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // Health Score card
                 uiState.healthScore?.let { score ->
                     item {
@@ -172,18 +206,43 @@ fun HomeScreen(
                     }
                 }
 
-                // Upcoming expiry
-                if (uiState.upcomingExpiryDocs.isNotEmpty()) {
-                    item {
-                        SectionHeader(
-                            title = "Expiring Soon",
-                            action = {
+                // Upcoming expiry — horizontal LazyRow (Req 18.3)
+                item {
+                    SectionHeader(
+                        title = "Documents Expiring Soon",
+                        action = {
+                            if (uiState.upcomingExpiryDocs.isNotEmpty()) {
                                 TextButton(onClick = onNavigateToDocuments) { Text("See all") }
                             }
-                        )
-                    }
-                    items(uiState.upcomingExpiryDocs.take(3)) { doc ->
-                        ExpiryDocumentCard(doc = doc, onClick = onNavigateToDocuments)
+                        }
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    if (uiState.upcomingExpiryDocs.isEmpty()) {
+                        // "No documents expiring soon" when section is empty (Req 18.3)
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Text(
+                                "No documents expiring soon",
+                                modifier = Modifier.padding(16.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            )
+                        }
+                    } else {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(horizontal = 4.dp)
+                        ) {
+                            items(uiState.upcomingExpiryDocs.take(3)) { doc ->
+                                ExpiryDocumentCard(
+                                    doc = doc,
+                                    onClick = onNavigateToDocuments
+                                )
+                            }
+                        }
                     }
                 }
 
@@ -215,6 +274,7 @@ private fun HealthScoreCard(score: FamilyHealthScore) {
         animationSpec = tween(1000),
         label = "score"
     )
+    // Use AnimatedCounter for Req 17.3 and accessibility (Req 20.5)
 
     GlassCard {
         Column {
@@ -235,24 +295,30 @@ private fun HealthScoreCard(score: FamilyHealthScore) {
                     )
                 }
 
-                Box(contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(
-                        progress = { score.score / 100f },
-                        modifier = Modifier.size(72.dp),
-                        strokeWidth = 6.dp,
-                        color = when {
-                            score.score >= 75 -> Color(SuccessGreen.value)
-                            score.score >= 50 -> Gold600
-                            else -> WarningOrange
-                        },
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                    Text(
-                        "$animatedScore",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.semantics {
+                            contentDescription = "Family Health Score: ${score.score} out of 100"
+                        }
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { score.score / 100f },
+                            modifier = Modifier.size(72.dp),
+                            strokeWidth = 6.dp,
+                            color = when {
+                                score.score >= 70 -> MaterialTheme.colorScheme.primary
+                                score.score >= 40 -> MaterialTheme.colorScheme.tertiary
+                                else             -> MaterialTheme.colorScheme.error
+                            },
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        AnimatedCounter(
+                            targetValue = score.score,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
             }
 
             if (score.insights.isNotEmpty()) {
@@ -320,38 +386,37 @@ private fun ExpiryDocumentCard(doc: Document, onClick: () -> Unit) {
         else -> Color(SuccessGreen.value)
     }
 
+    // Fixed width so horizontal scroll cards look uniform (Req 18.3)
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.width(180.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(
-                    Icons.Default.Description,
-                    null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Column {
-                    Text(doc.title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
-                    Text(doc.type, style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
-                }
-            }
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(
+                Icons.Default.Description,
+                null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                doc.title,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1
+            )
+            Text(
+                doc.type,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                maxLines = 1
+            )
             Surface(
                 color = urgencyColor.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(6.dp)
             ) {
                 Text(
                     text = if (daysLeft != null) "$daysLeft days" else "No expiry",
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                     style = MaterialTheme.typography.labelSmall,
                     color = urgencyColor
                 )

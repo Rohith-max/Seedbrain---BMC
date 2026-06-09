@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.compose.viewmodel.koinViewModel
 import com.nidhi.app.domain.model.Conversation
+import com.nidhi.app.ui.components.EmptyState
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,30 +39,14 @@ fun AiChatListScreen(
         }
     ) { padding ->
         if (uiState.conversations.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Icon(Icons.Default.Chat, null,
-                        modifier = Modifier.size(72.dp),
-                        tint = MaterialTheme.colorScheme.primary)
-                    Text("Ask NIDHI anything",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.SemiBold)
-                    Text(
-                        "Government benefits • Document help\nFinancial planning • Tax deadlines",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                    Button(onClick = onNewChat) {
-                        Text("Start Conversation")
-                    }
-                }
-            }
+            // Empty state (Req 16.3)
+            EmptyState(
+                icon = Icons.Default.Chat,
+                message = "Start a conversation with NIDHI AI",
+                ctaLabel = "New Conversation",
+                onCtaClick = onNewChat,
+                modifier = Modifier.padding(padding)
+            )
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),

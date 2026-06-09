@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -19,9 +21,23 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String",  "LLM_API_KEY",       "\"SIMULATED\"")
-        buildConfigField("String",  "LLM_BASE_URL",      "\"https://api.openai.com/v1/\"")
-        buildConfigField("Boolean", "USE_SIMULATED_LLM", "true")
+        // Load local.properties
+        val localProperties = Properties().apply {
+            val localPropertiesFile = project.rootProject.file("local.properties")
+            if (localPropertiesFile.exists()) {
+                load(localPropertiesFile.inputStream())
+            }
+        }
+
+        val apiKey = localProperties.getProperty("LLM_API_KEY") ?: "SIMULATED"
+        val baseUrl = localProperties.getProperty("LLM_BASE_URL") ?: "https://api.openai.com/v1/"
+        val model = localProperties.getProperty("LLM_MODEL") ?: "gpt-4o-mini"
+        val useSimulated = apiKey == "SIMULATED"
+
+        buildConfigField("String",  "LLM_API_KEY",       "\"$apiKey\"")
+        buildConfigField("String",  "LLM_BASE_URL",      "\"$baseUrl\"")
+        buildConfigField("String",  "LLM_MODEL",         "\"$model\"")
+        buildConfigField("Boolean", "USE_SIMULATED_LLM", "$useSimulated")
     }
 
     buildTypes {

@@ -107,6 +107,8 @@ class DocumentViewModel(
 
     fun deleteDocument(doc: Document) { viewModelScope.launch { documentRepository.deleteDocument(doc) } }
     fun clearCaptureState() { _captureUiState.value = CaptureUiState() }
+    /** Surfaces a camera hardware error without restarting the screen (Req 11.8). */
+    fun setCaptureError(msg: String) { _captureUiState.update { it.copy(error = msg, isProcessing = false) } }
 
     private fun parseDate(s: String?): Long? {
         if (s.isNullOrBlank()) return null

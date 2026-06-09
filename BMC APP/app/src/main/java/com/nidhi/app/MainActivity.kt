@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,8 +29,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val isDarkTheme by userPreferences.isDarkTheme.collectAsState(initial = false)
-            // Collect onboarding state reactively — no runBlocking on main thread
+            // Three-way theme (Req 19.1, 19.2)
+            val themeMode by userPreferences.themeMode.collectAsState(initial = "System Default")
+            val systemDark  = isSystemInDarkTheme()
+            val isDarkTheme = when (themeMode) {
+                "Dark"  -> true
+                "Light" -> false
+                else    -> systemDark          // "System Default"
+            }
+
             val isOnboardingComplete by userPreferences.isOnboardingComplete.collectAsState(initial = null)
 
             // Keep splash visible until preferences are loaded
@@ -39,7 +47,6 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     when (val onboarding = isOnboardingComplete) {
                         null -> {
-                            // Preferences still loading — show centred spinner
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center

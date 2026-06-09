@@ -1,13 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ============================================================
    NIDHI — Family Operating System
    Design Language: Luxury Indian Fintech
    ============================================================ */
 
-@theme {
+:root {
   /* Core Palette */
   --color-nidhi-black:         #080808;
   --color-nidhi-deep:          #0C0C0C;
@@ -34,7 +36,7 @@
   --color-nidhi-green-accent:  #10B981;
   --color-nidhi-green-glow:    rgba(16, 185, 129, 0.1);
   --color-nidhi-blue-accent:   #38BDF8;
-  --color-nidhi-blue-glow:    rgba(56, 189, 248, 0.1);
+  --color-nidhi-blue-glow:     rgba(56, 189, 248, 0.1);
 
   /* Semantic */
   --color-nidhi-success: #22C55E;

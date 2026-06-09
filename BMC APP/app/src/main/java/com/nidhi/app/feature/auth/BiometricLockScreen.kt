@@ -74,14 +74,20 @@ fun BiometricLockScreen(
         label = "scale"
     )
 
-    // Check if biometric is available; if not, skip automatically
+    // Check if the device has any lock mechanism at all.
+    // Only skip if there is genuinely no PIN/pattern/biometric set (BIOMETRIC_ERROR_NONE_ENROLLED
+    // with DEVICE_CREDENTIAL also absent). Any other result — including transient HW errors —
+    // should still show the lock screen and let the user try or use PIN/Password.
     LaunchedEffect(Unit) {
         val biometricManager = BiometricManager.from(context)
         val canAuth = biometricManager.canAuthenticate(BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
-        if (canAuth != BiometricManager.BIOMETRIC_SUCCESS) {
+        if (canAuth == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
+            // Neither biometric nor device credential is enrolled — device has no lock at all.
             onSkip()
             return@LaunchedEffect
         }
+        // For all other results (SUCCESS, HW errors, etc.) attempt the prompt.
+        // The prompt itself will surface a useful error to the user if hardware is unavailable.
         triggerBiometric(context, onSuccess = onUnlocked, onError = { msg ->
             authState = AuthState.ERROR
             errorMessage = msg
@@ -238,10 +244,15 @@ fun triggerBiometric(
                 when (errorCode) {
                     BiometricPrompt.ERROR_USER_CANCELED,
                     BiometricPrompt.ERROR_NEGATIVE_BUTTON -> onError("Authentication cancelled. Tap to retry.")
-                    BiometricPrompt.ERROR_NO_BIOMETRICS,
-                    BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL -> onSuccess() // No lock configured — allow in
+                    // Hardware not present / not enrolled: show error, do NOT silently unlock.
+                    // The user must disable biometric lock in Settings if they no longer want it.
+                    BiometricPrompt.ERROR_NO_BIOMETRICS ->
+                        onError("No biometric enrolled. Use PIN / Password or disable biometric lock in Settings.")
+                    BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL ->
+                        onError("No screen lock set on this device. Please set a PIN or pattern in device Settings.")
                     BiometricPrompt.ERROR_HW_NOT_PRESENT,
-                    BiometricPrompt.ERROR_HW_UNAVAILABLE -> onSuccess() // No hardware — allow in
+                    BiometricPrompt.ERROR_HW_UNAVAILABLE ->
+                        onError("Biometric hardware unavailable. Use PIN / Password.")
                     else -> onError(errString.toString())
                 }
             }

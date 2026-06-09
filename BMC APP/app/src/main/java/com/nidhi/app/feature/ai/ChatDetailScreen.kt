@@ -25,7 +25,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,6 +37,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.nidhi.app.domain.model.ChatMessage
 import com.nidhi.app.domain.model.ChatRole
+import com.nidhi.app.ui.components.DocumentsContextChip
 import com.nidhi.app.ui.theme.Teal600
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -44,6 +47,7 @@ import java.util.Locale
 fun ChatDetailScreen(
     conversationId: String,
     onBack: () -> Unit,
+    seedPrompt: String = "",   // Req 10.1 — auto-send when arriving from Benefits → Ask AI
     viewModel: AiViewModel = koinViewModel()
 ) {
     val uiState by viewModel.chatDetailState.collectAsState()
@@ -65,6 +69,10 @@ fun ChatDetailScreen(
 
     LaunchedEffect(conversationId) {
         viewModel.loadConversation(conversationId)
+        // Auto-send the seed prompt if provided (Req 10.1)
+        if (seedPrompt.isNotBlank()) {
+            viewModel.sendMessage(seedPrompt)
+        }
     }
 
     LaunchedEffect(uiState.messages.size) {
@@ -122,6 +130,21 @@ fun ChatDetailScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        // Documents context chip (Req 9.5)
+                        DocumentsContextChip(
+                            docContextActive = uiState.messages.isNotEmpty(),
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .navigationBarsPadding()
+                            .imePadding(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         // Voice input
                         IconButton(onClick = {
                             if (micPermission.status.isGranted) {
@@ -144,28 +167,34 @@ fun ChatDetailScreen(
                             )
                         }
 
+                        // Disable text field while streaming (Req 8.5)
                         OutlinedTextField(
                             value = inputText,
-                            onValueChange = { inputText = it },
+                            onValueChange = { if (!uiState.isTyping) inputText = it },
                             placeholder = { Text("Ask NIDHI anything…") },
                             modifier = Modifier.weight(1f),
                             maxLines = 4,
-                            shape = RoundedCornerShape(24.dp)
+                            shape = RoundedCornerShape(24.dp),
+                            enabled = !uiState.isTyping
                         )
 
+                        // Send — disabled while streaming (Req 8.5)
                         IconButton(
                             onClick = {
-                                if (inputText.isNotBlank()) {
+                                if (inputText.isNotBlank() && !uiState.isTyping) {
                                     viewModel.sendMessage(inputText)
                                     inputText = ""
                                 }
                             },
-                            enabled = inputText.isNotBlank() && !uiState.isTyping
+                            enabled = inputText.isNotBlank() && !uiState.isTyping,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Send message"
+                            }
                         ) {
                             Icon(
                                 Icons.AutoMirrored.Filled.Send,
-                                "Send",
-                                tint = if (inputText.isNotBlank())
+                                contentDescription = null,
+                                tint = if (inputText.isNotBlank() && !uiState.isTyping)
                                     MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.outline
                             )
@@ -274,9 +303,14 @@ private fun MessageBubble(
     onSpeak: () -> Unit
 ) {
     val isUser = message.role == ChatRole.USER
+    // Accessibility: sender role + content (Req 20.6)
+    val senderLabel = if (isUser) "You" else "NIDHI AI"
+    val a11yLabel   = "$senderLabel: ${message.content}"
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) { contentDescription = a11yLabel },
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
         if (!isUser) {

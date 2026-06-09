@@ -36,7 +36,8 @@ data class FamilyMemberEntity(
     val relation: String,
     val dob: Long?,
     val photoUri: String?,
-    val contactId: String?
+    val contactId: String?,
+    val updatedAt: Long = System.currentTimeMillis()   // NEW — required for sync conflict resolution
 )
 
 // ── Document ──────────────────────────────────────────────────────────────────
@@ -65,6 +66,13 @@ data class DocumentEntity(
     val linkedMemberId: String?,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
+)
+
+// ── Tombstone (deleted documents — prevents ghost re-sync) ─────────────────────
+@Entity(tableName = "deleted_documents")
+data class DeletedDocumentEntity(
+    @PrimaryKey val documentId: String,
+    val deletedAt: Long = System.currentTimeMillis()
 )
 
 // ── Benefit ───────────────────────────────────────────────────────────────────

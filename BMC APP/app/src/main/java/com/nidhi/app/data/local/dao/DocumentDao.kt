@@ -10,6 +10,9 @@ interface DocumentDao {
     @Query("SELECT * FROM documents WHERE ownerId = :ownerId ORDER BY createdAt DESC")
     fun getDocuments(ownerId: String): Flow<List<DocumentEntity>>
 
+    @Query("SELECT * FROM documents WHERE ownerId = :ownerId ORDER BY createdAt DESC")
+    suspend fun getDocumentsByOwner(ownerId: String): List<DocumentEntity>
+
     @Query("SELECT * FROM documents WHERE id = :id")
     suspend fun getDocumentById(id: String): DocumentEntity?
 
@@ -46,4 +49,7 @@ interface DocumentDao {
 
     @Query("SELECT COUNT(*) FROM documents WHERE ownerId = :ownerId")
     fun getDocumentCount(ownerId: String): Flow<Int>
+
+    @Query("SELECT DISTINCT type FROM documents WHERE ownerId = :ownerId")
+    suspend fun getDistinctTypes(ownerId: String): List<String>
 }
