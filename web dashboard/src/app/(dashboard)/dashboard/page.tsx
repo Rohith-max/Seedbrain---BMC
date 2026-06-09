@@ -15,6 +15,19 @@ import {
   Users,
 } from 'lucide-react';
 
+/* ── Animation Timing Constants ── */
+const ANIMATION = {
+  HERO_DELAY: 0,
+  HERO_DURATION: 0.45,
+  BANNER_DELAY: 0.1,
+  BANNER_DURATION: 0.45,
+  BRIEFING_DELAY: 0.2,
+  FEED_BASE_DELAY: 0.25,
+  FEED_STAGGER: 0.07,
+  ACTIONS_DELAY: 0.4,
+  ACTIONS_STAGGER: 0.07,
+};
+
 /* ── Animated number counter ── */
 function useCounter(target: number, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -34,6 +47,15 @@ function useCounter(target: number, duration = 1200) {
 }
 
 /* ── Hero stat counters ── */
+interface HeroStatProps {
+  label: string;
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  color?: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
 function HeroStat({
   label,
   value,
@@ -41,14 +63,7 @@ function HeroStat({
   suffix = '',
   color = 'text-nidhi-text',
   icon: Icon,
-}: {
-  label: string;
-  value: number;
-  prefix?: string;
-  suffix?: string;
-  color?: string;
-  icon: React.ElementType;
-}) {
+}: HeroStatProps) {
   const count = useCounter(value, 1400);
   return (
     <div className="flex flex-col gap-2 min-w-0">
@@ -66,13 +81,15 @@ function HeroStat({
 /* ── Intelligence feed data ── */
 type FeedType = 'opportunity' | 'deadline' | 'action' | 'reminder';
 
-const FEED: {
+interface FeedItem {
   id: string;
   type: FeedType;
   title: string;
   meta: string;
   href: string;
-}[] = [
+}
+
+const FEED: FeedItem[] = [
   {
     id: 'f1',
     type: 'opportunity',
@@ -110,31 +127,50 @@ const FEED: {
   },
 ];
 
-const TYPE_CFG: Record<FeedType, { border: string; tag: string; tagColor: string }> = {
+interface TypeConfig {
+  border: string;
+  tag: string;
+  tagColor: string;
+  borderColor: string;
+}
+
+const TYPE_CFG: Record<FeedType, TypeConfig> = {
   opportunity: {
     border: 'border-l-nidhi-success',
     tag: 'Opportunity',
     tagColor: 'tag-success',
+    borderColor: 'var(--color-nidhi-success)',
   },
   deadline: {
     border: 'border-l-nidhi-warning',
     tag: 'Deadline',
     tagColor: 'tag-warning',
+    borderColor: 'var(--color-nidhi-warning)',
   },
   reminder: {
     border: 'border-l-nidhi-info',
     tag: 'Reminder',
     tagColor: 'tag',
+    borderColor: 'var(--color-nidhi-info)',
   },
   action: {
     border: 'border-l-nidhi-danger',
     tag: 'Action',
     tagColor: 'tag-danger',
+    borderColor: 'var(--color-nidhi-danger)',
   },
 };
 
 /* ── Quick action cards ── */
-const QUICK_ACTIONS = [
+interface QuickActionProps {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  desc: string;
+  iconBg: string;
+}
+
+const QUICK_ACTIONS: QuickActionProps[] = [
   {
     href: '/dashboard/assistant',
     icon: Bot,
@@ -175,26 +211,23 @@ export default function HomePage() {
   const firstName = user?.name?.split(' ')[0] ?? 'Rajesh';
 
   return (
-    <div style={{ padding: '48px 40px', maxWidth: '1100px', display: 'flex', flexDirection: 'column', gap: '56px' }}>
+    <div className="w-full max-w-4xl mx-auto px-6 md:px-10 py-12 flex flex-col gap-14">
 
       {/* ── HERO GREETING ────────────────────────────── */}
       <section>
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45 }}
-          className=""
-          style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}
+          transition={{ duration: ANIMATION.HERO_DURATION }}
+          className="flex flex-col gap-3.5"
         >
           <p className="section-label">{greeting}</p>
 
-          <h1 className="font-display font-bold text-nidhi-text"
-            style={{ fontSize: '56px', lineHeight: 1.08, letterSpacing: '-0.5px' }}
-          >
+          <h1 className="font-display font-bold text-nidhi-text text-4xl md:text-5xl lg:text-6xl leading-tight md:leading-tight -tracking-0.5">
             {firstName}.
           </h1>
 
-          <p className="text-lg text-nidhi-text-secondary leading-relaxed">
+          <p className="text-base md:text-lg text-nidhi-text-secondary leading-relaxed">
             Your family&apos;s intelligence report for today.
           </p>
 
@@ -213,12 +246,12 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.1 }}
-          className="card-hero p-8"
+          transition={{ duration: ANIMATION.BANNER_DURATION, delay: ANIMATION.BANNER_DELAY }}
+          className="card-hero p-6 md:p-8"
         >
-          <p className="section-label" style={{ marginBottom: '20px' }}>Family Health</p>
+          <p className="section-label mb-5 md:mb-5">Family Health</p>
 
-          <div className="grid grid-cols-2 md:grid-cols-[auto_1px_1fr_1fr_1fr_1fr] gap-8 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-[auto_1px_1fr_1fr_1fr_1fr] gap-6 md:gap-8 items-center">
             {/* Score circle */}
             <div className="flex flex-col items-start gap-3">
               <div className="score-ring">
@@ -249,14 +282,20 @@ export default function HomePage() {
             </div>
 
             {/* Divider */}
-            <div className="hidden md:block h-20 bg-nidhi-border-subtle self-center" style={{ width: '1px' }} />
+            <div className="hidden md:block h-20 bg-nidhi-border-subtle" style={{ width: '1px' }} />
 
-            {/* Stats */}
-            <HeroStat icon={FileText} label="Documents" value={128} color="text-nidhi-text" />
-            <HeroStat icon={Gift} label="Benefits Available" value={21} color="text-nidhi-success" />
-            <HeroStat icon={AlertCircle} label="Active Risks" value={3} color="text-nidhi-danger" />
+            {/* Stats - Responsive grid */}
+            <div className="col-span-full md:col-span-1">
+              <HeroStat icon={FileText} label="Documents" value={128} color="text-nidhi-text" />
+            </div>
+            <div className="col-span-full md:col-span-1">
+              <HeroStat icon={Gift} label="Benefits Available" value={21} color="text-nidhi-success" />
+            </div>
+            <div className="col-span-full md:col-span-1">
+              <HeroStat icon={AlertCircle} label="Active Risks" value={3} color="text-nidhi-danger" />
+            </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="col-span-full md:col-span-1 flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <IndianRupee className="w-4 h-4 text-nidhi-gold flex-shrink-0" />
                 <span className="text-3xl font-display font-bold text-nidhi-gold leading-none">3.7L</span>
@@ -272,8 +311,8 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex items-center justify-between" style={{ marginBottom: '20px' }}
+          transition={{ delay: ANIMATION.BRIEFING_DELAY }}
+          className="flex items-center justify-between mb-5"
         >
           <p className="section-label">Today&apos;s Briefing</p>
           <Link
@@ -285,7 +324,7 @@ export default function HomePage() {
           </Link>
         </motion.div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="flex flex-col gap-3">
           {FEED.map((item, idx) => {
             const cfg = TYPE_CFG[item.type];
             return (
@@ -293,27 +332,24 @@ export default function HomePage() {
                 key={item.id}
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.35, delay: 0.25 + idx * 0.07 }}
+                transition={{ 
+                  duration: 0.35, 
+                  delay: ANIMATION.FEED_BASE_DELAY + idx * ANIMATION.FEED_STAGGER 
+                }}
               >
                 <Link href={item.href} className="block group">
                   <div
-                    className={`flex items-center gap-4 px-5 py-5 card card-hover border-l-[3px]`}
-                    style={{
-                      borderLeftColor:
-                        item.type === 'opportunity' ? 'var(--color-nidhi-success)'
-                        : item.type === 'deadline'  ? 'var(--color-nidhi-warning)'
-                        : item.type === 'action'    ? 'var(--color-nidhi-danger)'
-                        : 'var(--color-nidhi-info)',
-                    }}
+                    className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 px-4 sm:px-5 py-5 card card-hover border-l-[3px]"
+                    style={{ borderLeftColor: cfg.borderColor }}
                   >
-                    <div className="flex-1 min-w-0" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <span className={`tag ${cfg.tagColor}`}>{cfg.tag}</span>
-                      <p className="text-[15px] font-semibold text-nidhi-text leading-snug">
+                    <div className="flex-1 min-w-0 flex flex-col gap-2 w-full">
+                      <span className={`tag ${cfg.tagColor} w-fit`}>{cfg.tag}</span>
+                      <p className="text-[15px] font-semibold text-nidhi-text leading-snug break-words">
                         {item.title}
                       </p>
                       <p className="text-sm text-nidhi-text-muted">{item.meta}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-nidhi-text-muted group-hover:text-nidhi-gold flex-shrink-0 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-nidhi-text-muted group-hover:text-nidhi-gold flex-shrink-0 transition-colors hidden sm:block" />
                   </div>
                 </Link>
               </motion.div>
@@ -327,13 +363,13 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          style={{ marginBottom: '20px' }}
+          transition={{ delay: ANIMATION.ACTIONS_DELAY }}
+          className="mb-5"
         >
           <p className="section-label">Quick Actions</p>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {QUICK_ACTIONS.map((action, idx) => {
             const Icon = action.icon;
             return (
@@ -341,22 +377,25 @@ export default function HomePage() {
                 key={action.href}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: 0.45 + idx * 0.07 }}
+                transition={{ 
+                  duration: 0.35, 
+                  delay: ANIMATION.ACTIONS_DELAY + idx * ANIMATION.ACTIONS_STAGGER 
+                }}
               >
-                <Link href={action.href} className="block group">
-                  <div className="card card-hover flex items-center gap-5 px-5 py-5">
+                <Link href={action.href} className="block group h-full">
+                  <div className="card card-hover flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 px-4 sm:px-5 py-4 sm:py-5 h-full">
                     <div
                       className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${action.iconBg}`}
                     >
                       <Icon className="w-5 h-5" />
                     </div>
-                    <div className="flex-1 min-w-0" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <p className="font-semibold text-nidhi-text text-[15px] leading-tight">
                         {action.title}
                       </p>
-                      <p className="text-sm text-nidhi-text-muted">{action.desc}</p>
+                      <p className="text-sm text-nidhi-text-muted line-clamp-2">{action.desc}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-nidhi-text-muted group-hover:text-nidhi-gold flex-shrink-0 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-nidhi-text-muted group-hover:text-nidhi-gold flex-shrink-0 transition-colors hidden sm:block" />
                   </div>
                 </Link>
               </motion.div>
