@@ -12,13 +12,13 @@ export async function askAI(question: string): Promise<LLMResponse> {
   // Retrieve relevant document context via RAG
   const ragResult = await retrieveRelevantContext(question);
 
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = process.env.GROQ_LLM_API_KEY;
 
   // If no API key is set, fall back to a descriptive mock response
   if (!apiKey) {
-    console.warn('GROQ_API_KEY not set — using fallback mock response.');
+    console.warn('GROQ_LLM_API_KEY not set — using fallback mock response.');
     return {
-      answer: `I found relevant documents in your vault. To get AI-powered answers, please add your GROQ_API_KEY to .env.local. Relevant documents: ${ragResult.documents.map(d => d.title).join(', ')}.`,
+      answer: `I found relevant documents in your vault. To get AI-powered answers, please add your GROQ_LLM_API_KEY to .env.local. Relevant documents: ${ragResult.documents.map(d => d.title).join(', ')}.`,
       sources: ragResult.documents.map(d => ({ title: d.title, type: d.category })),
     };
   }
@@ -64,7 +64,7 @@ ${ragResult.contextString}`;
   } catch (err) {
     console.error('askAI error:', err);
     return {
-      answer: 'I encountered an error while fetching your answer. Please check your GROQ_API_KEY and try again.',
+      answer: 'I encountered an error while fetching your answer. Please check your GROQ_LLM_API_KEY and try again.',
       sources: [],
     };
   }
