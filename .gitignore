@@ -20,3 +20,9 @@ local.properties
 # Secret keys — NEVER commit
 secrets.properties
 app/google-services.json
+
+# Large Binaries and Logs
+*.apk
+*.log
+*.txt
+logs/
