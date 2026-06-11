@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     // Forward to Groq Whisper (OpenAI-compatible endpoint)
     const whisperForm = new FormData();
     whisperForm.append('file', audioFile, audioFile.name || 'audio.webm');
-    whisperForm.append('model', 'whisper-large-v3');
+    whisperForm.append('model', 'whisper-large-v3-turbo');
     whisperForm.append('response_format', 'verbose_json');
     // Constrain transcription to the user-selected language (no auto-detect)
     if (languageHint) {

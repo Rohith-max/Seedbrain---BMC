@@ -1,8 +1,71 @@
-'use client';
-
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 
 export type TTSState = 'idle' | 'speaking';
+
+/** Helper to play audio chunks sequentially via our Next.js API proxy */
+const playCloudTTS = (text: string, langPrefix: string, onStart: () => void, onEnd: () => void, audioRef: React.MutableRefObject<HTMLAudioElement | null>) => {
+  // Split text by punctuation or into chunks of max 150 chars
+  const rawChunks = text.match(/[^.!?,\n]+[.!?,\n]+/g) || [text];
+  const chunks: string[] = [];
+  rawChunks.forEach(c => {
+    if (c.length < 150) {
+      chunks.push(c);
+    } else {
+      const words = c.split(' ');
+      let current = '';
+      words.forEach(w => {
+        if (current.length + w.length > 150) {
+          chunks.push(current);
+          current = w + ' ';
+        } else {
+          current += w + ' ';
+        }
+      });
+      if (current) chunks.push(current);
+    }
+  });
+
+  let currentIndex = 0;
+  const audio = new Audio();
+  audioRef.current = audio;
+  
+  onStart();
+
+  const playNext = () => {
+    if (currentIndex >= chunks.length) {
+      onEnd();
+      return;
+    }
+    const chunk = chunks[currentIndex].trim();
+    if (!chunk) {
+      currentIndex++;
+      playNext();
+      return;
+    }
+    
+    // Call our server proxy instead of Google directly to bypass CORS / blockers
+    const url = `/api/tts?lang=${langPrefix}&text=${encodeURIComponent(chunk)}`;
+    audio.src = url;
+    audio.play().catch(e => {
+      console.error('Cloud TTS playback failed', e);
+      // Skip chunk if it fails to play
+      currentIndex++;
+      playNext();
+    });
+  };
+
+  audio.onended = () => {
+    currentIndex++;
+    playNext();
+  };
+
+  audio.onerror = () => {
+    currentIndex++;
+    playNext();
+  };
+
+  playNext();
+};
 
 /** Supported languages and their BCP-47 locale codes for SpeechSynthesis */
 export const SUPPORTED_LANGS = {
@@ -16,24 +79,14 @@ export type SupportedLang = keyof typeof SUPPORTED_LANGS;
 
 export function useTTS() {
   const [ttsState, setTtsState] = useState<TTSState>('idle');
-  const [isSupported, setIsSupported] = useState(false);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      synthRef.current = window.speechSynthesis;
-      setIsSupported(true);
-      // Pre-load voices (some browsers need this trigger)
-      window.speechSynthesis.getVoices();
-    }
-  }, []);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const speak = useCallback((text: string, lang: SupportedLang = 'english') => {
-    const synth = synthRef.current;
-    if (!synth) return;
-
     // Cancel any ongoing speech first
-    synth.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
 
     // Strip markdown bold markers for cleaner speech
     const cleanText = text
@@ -43,31 +96,25 @@ export function useTTS() {
       .trim();
 
     const bcp47 = SUPPORTED_LANGS[lang].bcp47;
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = bcp47;
-    utterance.rate = 1.0;
-    utterance.pitch = 1.05;
-    utterance.volume = 1.0;
+    const langPrefix = bcp47.split('-')[0];
 
-    // Try to find the best matching voice
-    const voices = synth.getVoices();
-    const exactMatch = voices.find(v => v.lang === bcp47);
-    const partialMatch = voices.find(v => v.lang.startsWith(bcp47.split('-')[0]));
-    if (exactMatch) utterance.voice = exactMatch;
-    else if (partialMatch) utterance.voice = partialMatch;
-
-    utterance.onstart = () => setTtsState('speaking');
-    utterance.onend = () => setTtsState('idle');
-    utterance.onerror = () => setTtsState('idle');
-
-    setTtsState('speaking');
-    synth.speak(utterance);
+    // Always use Cloud TTS for a guaranteed high-quality, correct-language female voice
+    playCloudTTS(
+      cleanText, 
+      langPrefix, 
+      () => setTtsState('speaking'), 
+      () => setTtsState('idle'), 
+      audioRef
+    );
   }, []);
 
   const stopSpeaking = useCallback(() => {
-    synthRef.current?.cancel();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     setTtsState('idle');
   }, []);
 
-  return { ttsState, isSupported, speak, stopSpeaking };
+  return { ttsState, isSupported: true, speak, stopSpeaking };
 }

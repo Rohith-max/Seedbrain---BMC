@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { VoiceMicButton } from '@/components/voice/VoiceMicButton';
 import { useTTS, SUPPORTED_LANGS, SupportedLang } from '@/lib/hooks/useTTS';
+import { analyzeIntent, translateText } from '@/app/actions/chat';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -137,14 +138,6 @@ const SUGGESTED: string[] = [
   'Which government benefits am I eligible for?',
 ];
 
-function getResponse(q: string): ResponseDef {
-  const lower = q.toLowerCase();
-  for (const { keywords, response } of RESPONSES) {
-    if (keywords.some((k) => lower.includes(k))) return response;
-  }
-  return FALLBACK;
-}
-
 // ─── Streaming Text Component ─────────────────────────────────────────────────
 
 function StreamingText({ text, onDone }: { text: string; onDone: () => void }) {
@@ -253,66 +246,59 @@ export default function AssistantPage() {
 
   /** Send a message, get response, optionally speak it */
   const send = useCallback(
-    async (text: string) => {
+    (text: string, overrideLang?: SupportedLang) => {
       if (!text.trim() || thinking || streamingId) return;
 
+      const currentLang = overrideLang || activeLang;
       const userId = `u-${Date.now()}`;
-      setMessages((prev) => [...prev, { id: userId, role: 'user', content: text, lang: activeLang }]);
+      setMessages((prev) => [...prev, { id: userId, role: 'user', content: text, lang: currentLang }]);
       setInput('');
       setThinking(true);
 
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question: text }),
-        });
-        
-        const data = await res.json();
-        
-        setThinking(false);
-        const aiId = `a-${Date.now()}`;
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: aiId,
-            role: 'assistant',
-            content: data.answer || "I'm sorry, I encountered an error.",
-            sources: data.sources || [],
-            streaming: true,
-            lang: activeLang,
-          },
-        ]);
-        setStreamingId(aiId);
-      } catch (err) {
-        setThinking(false);
-        const aiId = `a-${Date.now()}`;
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: aiId,
-            role: 'assistant',
-            content: "Sorry, I couldn't reach the server. Please try again.",
-            streaming: true,
-            lang: activeLang,
-          },
-        ]);
-        setStreamingId(aiId);
+      if (overrideLang) {
+        setActiveLang(overrideLang);
       }
+
+      analyzeIntent(text).then(async (intentId) => {
+        const def = intentId === 7 || !RESPONSES[intentId] ? FALLBACK : RESPONSES[intentId].response;
+        const delay = def.thinkingMs ?? 900;
+        
+        const finalContent = currentLang === 'english' ? def.content : await translateText(def.content, SUPPORTED_LANGS[currentLang].label);
+
+        setTimeout(() => {
+          setThinking(false);
+          const aiId = `a-${Date.now()}`;
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: aiId,
+              role: 'assistant',
+              content: finalContent,
+              sources: def.sources,
+              streaming: true,
+              lang: currentLang,
+            },
+          ]);
+          setStreamingId(aiId);
+        }, delay);
+      }).catch((err) => {
+        console.error("Intent parsing failed", err);
+        setThinking(false);
+      });
     },
     [thinking, streamingId, activeLang]
   );
 
   /** Called when StreamingText finishes rendering — speak the response */
   const handleStreamDone = useCallback(
-    (id: string, content: string) => {
+    (id: string, content: string, lang?: SupportedLang) => {
       setStreamingId(null);
       setMessages((prev) =>
         prev.map((m) => (m.id === id ? { ...m, streaming: false } : m))
       );
       // Speak the response if voice mode is on
       if (voiceMode) {
-        speak(content, activeLang);
+        speak(content, lang ?? activeLang);
       }
     },
     [voiceMode, activeLang, speak]
@@ -320,10 +306,17 @@ export default function AssistantPage() {
 
   /** Called by VoiceMicButton — transcript is in the user's selected language, auto-send it */
   const handleVoiceTranscript = useCallback(
-    (text: string) => {
-      if (text.trim()) send(text);
+    (text: string, detectedLangKey: string) => {
+      const map: Record<string, SupportedLang> = {
+        'en': 'english',
+        'hi': 'hindi',
+        'kn': 'kannada',
+        'ta': 'tamil'
+      };
+      const newLang = map[detectedLangKey] || activeLang;
+      if (text.trim()) send(text, newLang);
     },
-    [send]
+    [send, activeLang]
   );
 
   const handleLangChange = useCallback((lang: SupportedLang) => {
@@ -410,7 +403,7 @@ export default function AssistantPage() {
                       {msg.streaming && msg.id === streamingId ? (
                         <StreamingText
                           text={msg.content}
-                          onDone={() => handleStreamDone(msg.id, msg.content)}
+                          onDone={() => handleStreamDone(msg.id, msg.content, msg.lang)}
                         />
                       ) : (
                         <RichText text={msg.content} />

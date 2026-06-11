@@ -47,7 +47,7 @@ export function VoiceMicButton({ onTranscript, disabled = false }: VoiceMicButto
   // Forward transcript when Whisper finishes
   useEffect(() => {
     if (transcript) {
-      onTranscript(transcript, detectedLanguage);
+      onTranscript(transcript, selectedLang);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcript]);
