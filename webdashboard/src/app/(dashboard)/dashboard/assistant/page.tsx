@@ -253,7 +253,7 @@ export default function AssistantPage() {
 
   /** Send a message, get response, optionally speak it */
   const send = useCallback(
-    (text: string) => {
+    async (text: string) => {
       if (!text.trim() || thinking || streamingId) return;
 
       const userId = `u-${Date.now()}`;
@@ -261,10 +261,15 @@ export default function AssistantPage() {
       setInput('');
       setThinking(true);
 
-      const def = getResponse(text);
-      const delay = def.thinkingMs ?? 900;
-
-      setTimeout(() => {
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: text }),
+        });
+        
+        const data = await res.json();
+        
         setThinking(false);
         const aiId = `a-${Date.now()}`;
         setMessages((prev) => [
@@ -272,14 +277,28 @@ export default function AssistantPage() {
           {
             id: aiId,
             role: 'assistant',
-            content: def.content,
-            sources: def.sources,
+            content: data.answer || "I'm sorry, I encountered an error.",
+            sources: data.sources || [],
             streaming: true,
             lang: activeLang,
           },
         ]);
         setStreamingId(aiId);
-      }, delay);
+      } catch (err) {
+        setThinking(false);
+        const aiId = `a-${Date.now()}`;
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: aiId,
+            role: 'assistant',
+            content: "Sorry, I couldn't reach the server. Please try again.",
+            streaming: true,
+            lang: activeLang,
+          },
+        ]);
+        setStreamingId(aiId);
+      }
     },
     [thinking, streamingId, activeLang]
   );
