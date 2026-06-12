@@ -73,6 +73,7 @@ export const SUPPORTED_LANGS = {
   hindi:   { label: 'हिंदी',   bcp47: 'hi-IN', flag: '🇮🇳' },
   kannada: { label: 'ಕನ್ನಡ',  bcp47: 'kn-IN', flag: '🇮🇳' },
   tamil:   { label: 'தமிழ்',  bcp47: 'ta-IN', flag: '🇮🇳' },
+  malayalam: { label: 'മലയാളം', bcp47: 'ml-IN', flag: '🇮🇳' },
 } as const;
 
 export type SupportedLang = keyof typeof SUPPORTED_LANGS;
