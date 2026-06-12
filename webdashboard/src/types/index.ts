@@ -296,3 +296,48 @@ export interface ApplicationDraft {
   createdAt: string;
   updatedAt: string;
 }
+
+// ---- Cross-Member Intelligence ----
+export interface CrossMemberInsight {
+  id: string;
+  sourceMemberId: string;
+  targetMemberId: string;
+  sourceDocumentId?: string;
+  triggerType: 'benefit_unlock' | 'risk_alert' | 'deadline_cascade' | 'coverage_gap';
+  title: string;
+  description: string;
+  actionLabel: string;
+  actionHref: string;
+  priority: AlertPriority;
+  createdAt: string;
+}
+
+// ---- Proactive AI Notifications ----
+export interface ProactiveNotification {
+  id: string;
+  userId: string;
+  title: string;
+  body: string;
+  category: 'urgent' | 'opportunity' | 'insight' | 'reminder';
+  icon: string;
+  familyMemberId?: string;
+  actionLabel?: string;
+  actionHref?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+// ---- Secure Document Sharing ----
+export interface SharedLink {
+  id: string;
+  documentId: string;
+  documentTitle: string;
+  recipientName: string;
+  recipientEmail?: string;
+  permission: 'view' | 'download' | 'print';
+  expiresAt: string;
+  createdAt: string;
+  isRevoked: boolean;
+  redactSensitive: boolean;
+  accessCount: number;
+}

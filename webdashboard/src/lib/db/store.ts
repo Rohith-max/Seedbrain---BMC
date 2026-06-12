@@ -3,7 +3,7 @@
 // Replaces SQLite for zero-dependency local development
 // ============================================================
 
-import { User, FamilyMember, Document, Alert, Benefit, AIRecommendation, KnowledgeNode, KnowledgeEdge, ActivityLog, Notification, ApplicationDraft, DocumentCategory, AlertType, AlertPriority, BenefitCategory } from '@/types';
+import { User, FamilyMember, Document, Alert, Benefit, AIRecommendation, KnowledgeNode, KnowledgeEdge, ActivityLog, Notification, ApplicationDraft, DocumentCategory, AlertType, AlertPriority, BenefitCategory, CrossMemberInsight, ProactiveNotification, SharedLink } from '@/types';
 
 // ---- Sharma Family Demo Data ----
 
@@ -410,6 +410,134 @@ const DEMO_ACTIVITY_LOGS: ActivityLog[] = [
 ];
 
 // ============================================================
+// Cross-Member Intelligence Demo Data
+// ============================================================
+
+const DEMO_CROSS_MEMBER_INSIGHTS: CrossMemberInsight[] = [
+  {
+    id: 'cmi-001', sourceMemberId: 'fm-001', targetMemberId: 'fm-003',
+    sourceDocumentId: 'doc-009',
+    triggerType: 'benefit_unlock',
+    title: 'Income Certificate → Aarav qualifies for CBSE Merit Scholarship',
+    description: 'Rajesh\'s ITR shows annual income of ₹18.5L. Combined with Aarav\'s 86.6% in Class 10, he qualifies for the National Merit Scholarship worth ₹12,000/year.',
+    actionLabel: 'Apply for Scholarship', actionHref: '/dashboard/benefits',
+    priority: 'high', createdAt: '2025-06-02T14:00:00Z',
+  },
+  {
+    id: 'cmi-002', sourceMemberId: 'fm-005', targetMemberId: 'fm-001',
+    sourceDocumentId: 'doc-004',
+    triggerType: 'risk_alert',
+    title: 'Kamla Devi\'s HbA1c rising → Review family health insurance coverage',
+    description: 'Kamla Devi\'s HbA1c is 7.2% (above 7% target). Your Star Health family floater policy does NOT cover her. Consider adding senior citizen coverage.',
+    actionLabel: 'Check Coverage', actionHref: '/dashboard/vault',
+    priority: 'critical', createdAt: '2025-06-01T10:00:00Z',
+  },
+  {
+    id: 'cmi-003', sourceMemberId: 'fm-001', targetMemberId: 'fm-004',
+    sourceDocumentId: 'doc-005',
+    triggerType: 'benefit_unlock',
+    title: 'Property ownership → Ananya eligible for Sukanya Samriddhi Yojana',
+    description: 'As a property-owning family with a girl child under 14, you can open a Sukanya Samriddhi account for Ananya with 8.2% interest and tax benefits.',
+    actionLabel: 'Open Account', actionHref: '/dashboard/benefits',
+    priority: 'medium', createdAt: '2025-06-01T12:00:00Z',
+  },
+  {
+    id: 'cmi-004', sourceMemberId: 'fm-001', targetMemberId: 'fm-002',
+    sourceDocumentId: 'doc-008',
+    triggerType: 'deadline_cascade',
+    title: 'Home loan → Priya must be added as co-borrower for tax benefit',
+    description: 'Priya can claim Section 24(b) deduction of up to ₹2L on the home loan interest if added as a co-borrower. This could save ₹62,400 in taxes annually.',
+    actionLabel: 'View Tax Savings', actionHref: '/dashboard/analytics',
+    priority: 'high', createdAt: '2025-06-01T11:00:00Z',
+  },
+  {
+    id: 'cmi-005', sourceMemberId: 'fm-003', targetMemberId: 'fm-005',
+    sourceDocumentId: 'doc-006',
+    triggerType: 'coverage_gap',
+    title: 'Aarav entering Class 11 → Kamla Devi needs updated nominee in LIC policy',
+    description: 'With Aarav turning 18 soon, review LIC term policy nominees. Currently Priya is sole nominee — consider adding Aarav and updating Kamla Devi\'s dependency records.',
+    actionLabel: 'Update Nominees', actionHref: '/dashboard/vault',
+    priority: 'medium', createdAt: '2025-06-03T09:00:00Z',
+  },
+];
+
+// ============================================================
+// Proactive AI Notifications Demo Data
+// ============================================================
+
+const DEMO_PROACTIVE_NOTIFICATIONS: ProactiveNotification[] = [
+  {
+    id: 'pn-001', userId: 'user-001',
+    title: 'Kamla Devi\'s medication refill due in 3 days',
+    body: 'Based on her last prescription from Apollo Diagnostics, Metformin 500mg needs to be refilled by June 15. Would you like to order online?',
+    category: 'urgent', icon: 'Pill', familyMemberId: 'fm-005',
+    actionLabel: 'View Prescription', actionHref: '/dashboard/vault',
+    isRead: false, createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'pn-002', userId: 'user-001',
+    title: 'Aarav qualifies for ₹50,000 KVPY Scholarship',
+    body: 'With 86.6% in CBSE Class 10, Aarav is eligible for the Kishore Vaigyanik Protsahan Yojana. Application deadline: September 30, 2025.',
+    category: 'opportunity', icon: 'GraduationCap', familyMemberId: 'fm-003',
+    actionLabel: 'Apply Now', actionHref: '/dashboard/benefits',
+    isRead: false, createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'pn-003', userId: 'user-001',
+    title: 'Save ₹46,800 in taxes this year',
+    body: 'AI analysis found unclaimed Section 80C deductions from your LIC premium (₹12,500) and home loan principal repayment. Review before ITR filing deadline.',
+    category: 'insight', icon: 'TrendingUp', familyMemberId: 'fm-001',
+    actionLabel: 'View Tax Analysis', actionHref: '/dashboard/analytics',
+    isRead: false, createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'pn-004', userId: 'user-001',
+    title: 'Home Loan EMI of ₹48,500 due in 5 days',
+    body: 'SBI Home Loan EMI auto-debit scheduled for July 5. Your linked account balance is sufficient (₹1,23,450). No action needed.',
+    category: 'reminder', icon: 'CreditCard', familyMemberId: 'fm-001',
+    actionLabel: 'Check Balance', actionHref: '/dashboard/alerts',
+    isRead: true, createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'pn-005', userId: 'user-001',
+    title: 'Priya\'s PAN card missing from vault',
+    body: 'For complete family tax documentation, upload Priya\'s PAN card. This is needed for joint home loan tax benefit claims.',
+    category: 'reminder', icon: 'FileWarning', familyMemberId: 'fm-002',
+    actionLabel: 'Upload Now', actionHref: '/dashboard/vault',
+    isRead: false, createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'pn-006', userId: 'user-001',
+    title: 'BBMP Property Tax due next month — save 5% with early payment',
+    body: 'Property tax of ₹8,500 for 42 Maple Heights is due July 5. Pay before June 30 to get a 5% rebate (save ₹425).',
+    category: 'opportunity', icon: 'Home', familyMemberId: 'fm-001',
+    actionLabel: 'Pay Early', actionHref: '/dashboard/alerts',
+    isRead: false, createdAt: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+// ============================================================
+// Shared Links Demo Data
+// ============================================================
+
+const DEMO_SHARED_LINKS: SharedLink[] = [
+  {
+    id: 'sl-001', documentId: 'doc-004', documentTitle: 'Medical Report - Kamla Devi (Diabetes)',
+    recipientName: 'Dr. Mehta', recipientEmail: 'dr.mehta@apolloclinic.com',
+    permission: 'view', expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    isRevoked: false, redactSensitive: true, accessCount: 1,
+  },
+  {
+    id: 'sl-002', documentId: 'doc-008', documentTitle: 'Home Loan Statement - SBI',
+    recipientName: 'CA Suresh Iyer', recipientEmail: 'suresh@iyerca.in',
+    permission: 'download', expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    isRevoked: false, redactSensitive: false, accessCount: 3,
+  },
+];
+
+// ============================================================
 // Data Store Class
 // ============================================================
 
@@ -424,6 +552,9 @@ class DataStore {
   private knowledgeEdges: KnowledgeEdge[] = DEMO_KNOWLEDGE_EDGES;
   private activityLogs: ActivityLog[] = DEMO_ACTIVITY_LOGS;
   private notifications: Notification[] = [];
+  private crossMemberInsights: CrossMemberInsight[] = DEMO_CROSS_MEMBER_INSIGHTS;
+  private proactiveNotifications: ProactiveNotification[] = DEMO_PROACTIVE_NOTIFICATIONS;
+  private sharedLinks: SharedLink[] = DEMO_SHARED_LINKS;
 
   // ---- User ----
   getUser(): User { return this.user; }
@@ -490,6 +621,34 @@ class DataStore {
   // ---- Activity Logs ----
   getActivityLogs(): ActivityLog[] { return this.activityLogs; }
   addActivityLog(log: ActivityLog): void { this.activityLogs.unshift(log); }
+
+  // ---- Cross-Member Intelligence ----
+  getCrossMemberInsights(): CrossMemberInsight[] { return this.crossMemberInsights; }
+
+  // ---- Proactive Notifications ----
+  getProactiveNotifications(): ProactiveNotification[] { return this.proactiveNotifications; }
+  getUnreadNotificationCount(): number { return this.proactiveNotifications.filter(n => !n.isRead).length; }
+  markNotificationRead(id: string): void {
+    const n = this.proactiveNotifications.find(n => n.id === id);
+    if (n) n.isRead = true;
+  }
+  markAllNotificationsRead(): void {
+    this.proactiveNotifications.forEach(n => { n.isRead = true; });
+  }
+
+  // ---- Shared Links ----
+  getSharedLinks(): SharedLink[] { return this.sharedLinks; }
+  getActiveSharedLinks(): SharedLink[] {
+    return this.sharedLinks.filter(s => !s.isRevoked && new Date(s.expiresAt) > new Date());
+  }
+  createSharedLink(link: SharedLink): SharedLink {
+    this.sharedLinks.push(link);
+    return link;
+  }
+  revokeSharedLink(id: string): void {
+    const link = this.sharedLinks.find(s => s.id === id);
+    if (link) link.isRevoked = true;
+  }
 
   // ---- Dashboard Stats ----
   getDashboardStats() {

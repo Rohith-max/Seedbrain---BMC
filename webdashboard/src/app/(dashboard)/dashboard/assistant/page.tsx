@@ -130,12 +130,12 @@ const FALLBACK: ResponseDef = {
     `I've scanned all 12 documents in the vault. Here's what I can help you with:\n\n- Insurance policies and expiry dates\n- Loan details and EMI schedules\n- Tax deductions and ITR filing\n- Scholarship eligibility for Aarav\n- Medical records and follow-ups for Kamla Devi\n- Government scheme eligibility\n- Property and utility documents\n\nTry asking: "When does my health insurance expire?" or "What tax deductions can I claim?"`,
 };
 
-const SUGGESTED: string[] = [
-  'When does my LIC policy expire?',
-  'Is Aarav eligible for any scholarship?',
-  "Show Kamla Devi's medical summary",
-  'What are my home loan details?',
-  'Which government benefits am I eligible for?',
+const SUGGESTED: { text: string; lang: SupportedLang; label: string }[] = [
+  { text: 'When does my LIC policy expire?', lang: 'english', label: 'ENG' },
+  { text: 'मेरी बीमा कब expire हो रही है?', lang: 'hindi', label: 'हिंदी' },
+  { text: 'ನನ್ನ ಮಗನ scholarship ಬಗ್ಗೆ ಹೇಳಿ', lang: 'kannada', label: 'ಕನ್ನಡ' },
+  { text: 'എന്റെ ഹോം ലോൺ വിവരങ്ങൾ എന്താണ്?', lang: 'malayalam', label: 'മല' },
+  { text: 'What tax deductions can I claim?', lang: 'english', label: 'ENG' },
 ];
 
 // ─── Streaming Text Component ─────────────────────────────────────────────────
@@ -518,11 +518,14 @@ export default function AssistantPage() {
               {SUGGESTED.map((p, i) => (
                 <button
                   key={i}
-                  onClick={() => send(p)}
-                  className="flex-shrink-0 flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-xl bg-nidhi-card border border-nidhi-border-subtle text-nidhi-text-secondary hover:text-nidhi-gold hover:border-nidhi-gold/25 transition-all whitespace-nowrap"
+                  onClick={() => send(p.text, p.lang)}
+                  className="flex-shrink-0 flex items-center gap-2 text-xs px-3.5 py-2 rounded-xl bg-nidhi-card border border-nidhi-border-subtle text-nidhi-text-secondary hover:text-nidhi-gold hover:border-nidhi-gold/25 transition-all whitespace-nowrap group"
                 >
-                  {p}
-                  <ChevronRight className="w-3 h-3 opacity-50" />
+                  <span className="text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-nidhi-gold/10 text-nidhi-gold uppercase">
+                    {p.label}
+                  </span>
+                  <span>{p.text}</span>
+                  <ChevronRight className="w-3 h-3 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                 </button>
               ))}
             </div>
@@ -578,6 +581,22 @@ export default function AssistantPage() {
                 Voice responses enabled
               </>
             )}
+          </div>
+
+          {/* Floating Tap to Talk FAB for mobile/touch users */}
+          <div className="fixed bottom-24 right-4 md:hidden z-40">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-nidhi-gold rounded-full opacity-20 blur-md group-hover:opacity-40 transition-opacity" />
+              <div className="relative bg-nidhi-card border border-nidhi-gold/30 rounded-full px-4 py-3 flex items-center gap-3 shadow-2xl backdrop-blur-xl">
+                <VoiceMicButton
+                  onTranscript={handleVoiceTranscript}
+                  disabled={thinking || !!streamingId || isSpeaking}
+                />
+                <span className="text-[11px] font-bold text-nidhi-gold tracking-widest uppercase hidden sm:block pr-2">
+                  Tap to Talk
+                </span>
+              </div>
+            </div>
           </div>
         </form>
       </div>

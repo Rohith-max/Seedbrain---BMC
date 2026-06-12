@@ -655,6 +655,91 @@ function FamilyAnalytics({ members }: { members: FamilyMember[] }) {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
+function CrossMemberIntelligence({ members }: { members: FamilyMember[] }) {
+  const insights = dataStore.getCrossMemberInsights();
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+
+  const TRIGGER_CFG: Record<string, { color: string; bg: string; label: string }> = {
+    benefit_unlock:    { color: '#10B981', bg: 'rgba(16,185,129,0.12)', label: 'Benefit Unlocked' },
+    risk_alert:        { color: '#EF4444', bg: 'rgba(239,68,68,0.12)', label: 'Risk Alert' },
+    deadline_cascade:  { color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', label: 'Deadline Cascade' },
+    coverage_gap:      { color: '#6366F1', bg: 'rgba(99,102,241,0.12)', label: 'Coverage Gap' },
+  };
+
+  const getName = (id: string) => members.find(m => m.id === id)?.name?.split(' ')[0] ?? '?';
+
+  const visible = insights.filter(i => !dismissed.has(i.id));
+  if (visible.length === 0) return null;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <AlertTriangle style={{ width: '14px', height: '14px', color: '#D4AF37' }} />
+        </div>
+        <div>
+          <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-nidhi-text)' }}>Cross-Member Intelligence</p>
+          <p style={{ fontSize: '11px', color: 'var(--color-nidhi-text-muted)' }}>AI detected {visible.length} connections across your family</p>
+        </div>
+      </div>
+
+      {visible.map((insight, idx) => {
+        const cfg = TRIGGER_CFG[insight.triggerType];
+        return (
+          <motion.div
+            key={insight.id}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.06 }}
+            style={{
+              padding: '16px 20px',
+              borderRadius: '16px',
+              border: `1px solid var(--color-nidhi-border-subtle)`,
+              borderLeft: `3px solid ${cfg.color}`,
+              background: 'var(--color-nidhi-card)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{
+                fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em',
+                padding: '2px 6px', borderRadius: '4px', color: cfg.color, backgroundColor: cfg.bg,
+              }}>
+                {cfg.label}
+              </span>
+              <span style={{ fontSize: '11px', color: 'var(--color-nidhi-text-muted)' }}>
+                {getName(insight.sourceMemberId)} → {getName(insight.targetMemberId)}
+              </span>
+            </div>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-nidhi-text)', lineHeight: 1.4 }}>
+              {insight.title}
+            </p>
+            <p style={{ fontSize: '12px', color: 'var(--color-nidhi-text-muted)', lineHeight: 1.6 }}>
+              {insight.description}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <a
+                href={insight.actionHref}
+                style={{ fontSize: '12px', fontWeight: 600, color: cfg.color, textDecoration: 'none' }}
+              >
+                {insight.actionLabel} →
+              </a>
+              <button
+                onClick={() => setDismissed(prev => new Set(prev).add(insight.id))}
+                style={{ fontSize: '11px', color: 'var(--color-nidhi-text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                Dismiss
+              </button>
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function FamilyPage() {
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [showAdd, setShowAdd]    = useState(false);
@@ -687,6 +772,14 @@ export default function FamilyPage() {
           <UserPlus style={{ width: '16px', height: '16px' }} /> Add Member
         </motion.button>
       </motion.div>
+
+      {/* Cross-Member Intelligence Section */}
+      {members.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.03 }}>
+          <CrossMemberIntelligence members={members} />
+        </motion.div>
+      )}
+
 
       {/* Family head card */}
       {head && (

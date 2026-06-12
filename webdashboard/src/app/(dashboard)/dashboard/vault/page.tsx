@@ -12,6 +12,7 @@ import {
   GraduationCap, Receipt, Car, BarChart2, ChevronDown,
 } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { ShareModal, ActiveSharesList } from '@/components/vault/share-modal';
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis,
@@ -278,7 +279,7 @@ function UploadModal({ onClose }: { onClose: () => void }) {
 
 // ─── Document Card ───────────────────────────────────────────────────────────
 
-function DocumentCard({ doc, idx }: { doc: any; idx: number }) {
+function DocumentCard({ doc, idx, onShare }: { doc: any; idx: number; onShare?: (docId: string, docTitle: string) => void }) {
   const isExpiring =
     doc.expiryDate &&
     new Date(doc.expiryDate).getTime() - Date.now() < 90 * 24 * 60 * 60 * 1000;
@@ -352,11 +353,21 @@ function DocumentCard({ doc, idx }: { doc: any; idx: number }) {
             </span>
           )}
         </div>
-        {doc.expiryDate && (
-          <span className={`text-[10px] font-medium ${isExpired ? 'text-nidhi-danger' : isExpiring ? 'text-nidhi-warning' : 'text-nidhi-text-muted'}`}>
-            {isExpired ? 'Expired' : `Expires ${formatDate(doc.expiryDate)}`}
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {doc.expiryDate && (
+            <span className={`text-[10px] font-medium ${isExpired ? 'text-nidhi-danger' : isExpiring ? 'text-nidhi-warning' : 'text-nidhi-text-muted'}`}>
+              {isExpired ? 'Expired' : `Expires ${formatDate(doc.expiryDate)}`}
+            </span>
+          )}
+          {onShare && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onShare(doc.id, doc.title); }}
+              className="text-[10px] font-semibold text-nidhi-gold hover:text-nidhi-gold-light transition-colors flex items-center gap-1"
+            >
+              Share
+            </button>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -559,6 +570,7 @@ export default function VaultPage() {
   const [search, setSearch] = useState('');
   const [active, setActive] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [shareTarget, setShareTarget] = useState<{ docId: string; docTitle: string } | null>(null);
 
   useEffect(() => {
     setAllDocs(dataStore.getDocuments());
@@ -682,7 +694,7 @@ export default function VaultPage() {
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {filtered.map((doc, idx) => (
-              <DocumentCard key={doc.id} doc={doc} idx={idx} />
+              <DocumentCard key={doc.id} doc={doc} idx={idx} onShare={(id, title) => setShareTarget({ docId: id, docTitle: title })} />
             ))}
           </div>
         ) : (
@@ -700,11 +712,25 @@ export default function VaultPage() {
         )}
       </AnimatePresence>
 
+      {/* Active Secure Shares */}
+      <ActiveSharesList />
+
       <div className="h-8" />
 
       {/* Upload modal */}
       <AnimatePresence>
         {showUpload && <UploadModal onClose={() => setShowUpload(false)} />}
+      </AnimatePresence>
+
+      {/* Share modal */}
+      <AnimatePresence>
+        {shareTarget && (
+          <ShareModal
+            documentId={shareTarget.docId}
+            documentTitle={shareTarget.docTitle}
+            onClose={() => setShareTarget(null)}
+          />
+        )}
       </AnimatePresence>
     </div>
   );

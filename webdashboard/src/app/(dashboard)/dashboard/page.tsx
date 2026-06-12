@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { LifeOverview } from '@/components/dashboard/life-overview';
 import {
   FileText,
   Gift,
@@ -305,6 +306,9 @@ export default function HomePage() {
           </div>
         </motion.div>
       </section>
+
+      {/* ── LIFE OVERVIEW (Health + Finance) ───────────── */}
+      <LifeOverview />
 
       {/* ── INTELLIGENCE FEED ────────────────────────── */}
       <section>
