@@ -1,7 +1,6 @@
 import React from 'react';
 import { AppSidebar } from '@/components/dashboard/app-sidebar';
 import { Topbar } from '@/components/dashboard/topbar';
-import { NotificationCenter } from '@/components/dashboard/notification-center';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,9 +15,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
-
-      {/* Floating Notification Center */}
-      <NotificationCenter />
     </div>
   );
 }

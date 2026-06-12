@@ -5,6 +5,7 @@ import { useAuthStore } from '@/lib/store/auth-store';
 import { useRouter } from 'next/navigation';
 import { Bell, LogOut, Settings, ChevronDown } from 'lucide-react';
 import { GlobalSearch } from './global-search';
+import { NotificationCenter } from './notification-center';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function Topbar() {
@@ -28,19 +29,8 @@ export function Topbar() {
 
       {/* Right Section */}
       <div className="flex items-center gap-3 md:gap-4">
-        {/* Notification Bell */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative w-10 h-10 rounded-lg bg-nidhi-surface/60 hover:bg-nidhi-card border border-nidhi-border-subtle transition-all flex items-center justify-center group"
-        >
-          <Bell className="w-5 h-5 text-nidhi-text-secondary group-hover:text-nidhi-gold transition-colors" />
-          <motion.span
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-nidhi-danger rounded-full border border-nidhi-black/80"
-          />
-        </motion.button>
+        {/* Notification Bell (Live Feed) */}
+        <NotificationCenter />
 
         {/* Divider */}
         <div className="hidden md:block h-6 w-px bg-nidhi-border/30" />
