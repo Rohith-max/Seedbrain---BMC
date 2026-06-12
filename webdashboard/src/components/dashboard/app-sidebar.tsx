@@ -32,7 +32,6 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: '/dashboard', icon: Home, label: 'Home' },
   { href: '/dashboard/assistant', icon: Bot, label: 'AI Assistant' },
-  { href: '/dashboard/alerts', icon: Bell, label: 'Alerts', badge: '3' },
   { href: '/dashboard/benefits', icon: Gift, label: 'Benefits', badge: '12' },
   { href: '/dashboard/vault', icon: Archive, label: 'Documents' },
   { href: '/dashboard/family', icon: Users, label: 'Family' },
@@ -48,8 +47,12 @@ export function AppSidebar() {
   const { user, logout } = useAuthStore();
   const [collapsed, setCollapsed] = useState(false);
 
-  const handleLogout = () => {
-    document.cookie = 'nidhi-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error(e);
+    }
     logout();
     router.push('/login');
   };

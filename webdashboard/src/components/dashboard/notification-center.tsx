@@ -137,20 +137,19 @@ export function NotificationCenter() {
           </motion.div>
         )}
       </AnimatePresence>
-
       {/* Bell button (integrated in Topbar) */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => { setOpen(true); setShowToast(false); }}
-        className="relative w-10 h-10 rounded-lg bg-nidhi-surface/60 hover:bg-nidhi-card border border-nidhi-border-subtle transition-all flex items-center justify-center group"
+        className="relative z-50 w-11 h-11 rounded-xl flex items-center justify-center border border-nidhi-border-subtle bg-nidhi-card/80 backdrop-blur-xl hover:border-nidhi-gold/30 transition-all shadow-lg group"
       >
-        <Bell className="w-5 h-5 text-nidhi-text-secondary group-hover:text-nidhi-gold transition-colors" />
+        <Bell className="w-[18px] h-[18px] text-nidhi-text-secondary group-hover:text-nidhi-gold transition-colors" />
         {unreadCount > 0 && (
           <motion.span
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-nidhi-danger text-white text-[10px] font-bold flex items-center justify-center border-[1.5px] border-nidhi-black"
+            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-nidhi-black"
           >
             {unreadCount}
           </motion.span>

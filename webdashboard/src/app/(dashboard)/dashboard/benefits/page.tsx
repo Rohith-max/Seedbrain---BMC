@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { dataStore } from '@/lib/db/store';
 import { Benefit } from '@/types';
-import { ArrowRight, ChevronRight, IndianRupee, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronRight, IndianRupee, Sparkles, X, CheckCircle2 } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, string> = {
   government_scheme: 'Government Scheme',
@@ -41,6 +41,19 @@ function MatchBar({ score }: { score: number }) {
 
 export default function BenefitsPage() {
   const [benefits, setBenefits] = useState<Benefit[]>([]);
+  const [applying, setApplying] = useState<Benefit | 'all' | null>(null);
+  const [applyingStep, setApplyingStep] = useState(0);
+
+  useEffect(() => {
+    if (applying) {
+      setApplyingStep(0);
+      const timer1 = setTimeout(() => setApplyingStep(1), 1500);
+      const timer2 = setTimeout(() => setApplyingStep(2), 3000);
+      const timer3 = setTimeout(() => setApplyingStep(3), 4500);
+      const timer4 = setTimeout(() => setApplyingStep(4), 6500);
+      return () => { clearTimeout(timer1); clearTimeout(timer2); clearTimeout(timer3); clearTimeout(timer4); };
+    }
+  }, [applying]);
 
   useEffect(() => {
     setBenefits(dataStore.getBenefits());
@@ -73,7 +86,12 @@ export default function BenefitsPage() {
             <span style={{ fontSize: '48px', fontFamily: 'var(--font-display)', fontWeight: 700, background: 'linear-gradient(135deg,#D4AF37,#E8D080)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{totalValue}</span>
             <p style={{ fontSize: '14px', color: 'var(--color-nidhi-text-secondary)' }}>Across {eligible.length} government schemes, scholarships & tax benefits</p>
           </div>
-          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="btn-primary">
+          <motion.button 
+            onClick={() => setApplying('all')}
+            whileHover={{ scale: 1.03 }} 
+            whileTap={{ scale: 0.97 }} 
+            className="btn-primary"
+          >
             Claim All Benefits <ArrowRight style={{ width: '16px', height: '16px' }} />
           </motion.button>
         </div>
@@ -146,7 +164,9 @@ export default function BenefitsPage() {
                     Deadline: {new Date(benefit.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                 )}
-                <motion.button whileHover={{ x: 3 }}
+                <motion.button 
+                  onClick={() => setApplying(benefit)}
+                  whileHover={{ x: 3 }}
                   style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', fontWeight: 600, color: 'var(--color-nidhi-gold)', background: 'none', border: 'none', cursor: 'pointer' }}>
                   Start Application <ChevronRight style={{ width: '16px', height: '16px' }} />
                 </motion.button>
@@ -157,6 +177,89 @@ export default function BenefitsPage() {
       </div>
 
       <div style={{ height: '32px' }} />
+
+      {/* Auto-Apply Modal Fallback */}
+      <AnimatePresence>
+        {applying && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => {
+                // Prevent closing during application process if not completed
+                if (applyingStep === 4) setApplying(null);
+              }}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-md bg-nidhi-card border border-nidhi-gold/20 rounded-2xl overflow-hidden shadow-2xl z-10"
+            >
+              {/* Header */}
+              <div className="p-5 border-b border-nidhi-border-subtle flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-nidhi-text">Auto-Apply Assistant</h3>
+                  <p className="text-xs text-nidhi-text-secondary mt-0.5">{applying === 'all' ? 'Applying for All Eligible Benefits' : applying.title}</p>
+                </div>
+                {applyingStep === 4 && (
+                  <button onClick={() => setApplying(null)} className="text-nidhi-text-muted hover:text-nidhi-text p-1">
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Progress Steps */}
+              <div className="p-6 space-y-6">
+                {[
+                  { step: 0, label: 'Initializing Secure Connection' },
+                  { step: 1, label: 'Extracting KYC details from Vault' },
+                  { step: 2, label: 'Attaching Income & Identity Proofs' },
+                  { step: 3, label: 'Submitting to Portal' },
+                ].map((s) => (
+                  <div key={s.step} className="flex items-center gap-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors duration-500 flex-shrink-0 ${
+                      applyingStep > s.step ? 'border-nidhi-success bg-nidhi-success/10 text-nidhi-success' : 
+                      applyingStep === s.step ? 'border-nidhi-gold bg-nidhi-gold/10 text-nidhi-gold' : 
+                      'border-nidhi-border text-nidhi-text-muted'
+                    }`}>
+                      {applyingStep > s.step ? <CheckCircle2 className="w-4 h-4" /> : <div className={`w-2 h-2 rounded-full ${applyingStep === s.step ? 'bg-nidhi-gold animate-pulse' : 'bg-transparent'}`} />}
+                    </div>
+                    <div className="flex-1">
+                      <p className={`text-sm font-medium transition-colors duration-500 ${applyingStep >= s.step ? 'text-nidhi-text' : 'text-nidhi-text-muted'}`}>
+                        {s.label}
+                      </p>
+                      {applyingStep === s.step && (
+                        <p className="text-xs text-nidhi-gold mt-1">Processing...</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {applyingStep === 4 && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-8 p-4 rounded-xl bg-nidhi-success/10 border border-nidhi-success/30 text-center"
+                  >
+                    <CheckCircle2 className="w-8 h-8 text-nidhi-success mx-auto mb-2" />
+                    <p className="text-base font-bold text-nidhi-success">Application Submitted!</p>
+                    <p className="text-xs text-nidhi-text-secondary mt-1 mb-4">
+                      Reference ID: NIDHI-{Math.random().toString(36).substring(2, 10).toUpperCase()}
+                    </p>
+                    <button onClick={() => setApplying(null)} className="btn-primary w-full text-sm">
+                      Done
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
